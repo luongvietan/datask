@@ -1,0 +1,34 @@
+[project]
+name = "datask"
+version = "0.1.0"
+description = "Datask — Web Data API for AI Agents"
+requires-python = ">=3.12"
+
+[tool.uv.workspace]
+members = [
+    "apps/api",
+    "apps/worker",
+    "packages/core",
+    "packages/sdk-py",
+    "packages/mcp-server",
+]
+
+[tool.uv.sources]
+datask-core = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["apps/api/tests", "apps/worker/tests", "packages/core/tests"]
+asyncio_mode = "auto"

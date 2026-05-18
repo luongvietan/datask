@@ -1,0 +1,65 @@
+# ============================================================
+# Datask monorepo .gitignore
+# ============================================================
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# uv
+.venv/
+uv.lock
+
+# Node / JavaScript SDK (Phase 2)
+node_modules/
+*.tsbuildinfo
+.next/
+out/
+dist/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+*.log
+
+# Scrapling (submodule — has its own .git)
+Scrapling/
+
+# Alembic
+alembic/versions/*.pyc
+
+_bmad
+
+_bmad-output
+
+.agents
+

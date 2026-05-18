@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Datask Design System — Global Styles
+   Dark-only brand. Canvas is the whitespace.
+   ============================================================ */
+
+/* Inter Variable + Mona Sans via Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* Inter OpenType character variants — the brand voice */
+@layer base {
+  :root {
+    --font-feature-body: "cv01" on, "cv05" on, "cv09" on, "cv11" on,
+                         "ss03" on, "ss07" on, "dlig" on;
+    --font-feature-tabular: "tnum" on;
+  }
+
+  html {
+    background-color: #0C0C0C;
+    color: #FFFFFF;
+    font-family: "Inter Variable", "Inter", system-ui, sans-serif;
+    font-feature-settings: var(--font-feature-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Scrollbar — subtle on dark canvas */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+  /* Selection */
+  ::selection {
+    background-color: rgba(0, 153, 255, 0.25);
+    color: #FFFFFF;
+  }
+
+  /* Focus ring — accent-blue, never default browser outline */
+  :focus-visible {
+    outline: 1px solid #0099FF;
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================
+   Typography utilities — mirrors Design.md token names
+   ============================================================ */
+@layer components {
+  .text-display-xxl {
+    font-size: 110px;
+    line-height: 0.85;
+    letter-spacing: -5.5px;
+    font-weight: 500;
+  }
+  .text-display-xl {
+    font-size: 85px;
+    line-height: 0.95;
+    letter-spacing: -4.25px;
+    font-weight: 500;
+  }
+  .text-display-lg {
+    font-size: 62px;
+    line-height: 1.00;
+    letter-spacing: -3.1px;
+    font-weight: 500;
+  }
+  .text-display-md {
+    font-size: 32px;
+    line-height: 1.13;
+    letter-spacing: -1.0px;
+    font-weight: 500;
+  }
+
+  /* Responsive display scale */
+  @media (max-width: 810px) {
+    .text-display-xxl { font-size: 62px; letter-spacing: -3.1px; }
+    .text-display-xl  { font-size: 48px; letter-spacing: -2.4px; }
+    .text-display-lg  { font-size: 36px; letter-spacing: -1.8px; }
+  }
+  @media (max-width: 480px) {
+    .text-display-xxl { font-size: 40px; letter-spacing: -2.0px; }
+    .text-display-xl  { font-size: 32px; letter-spacing: -1.6px; }
+    .text-display-lg  { font-size: 28px; letter-spacing: -1.4px; }
+  }
+
+  /* ---- Buttons ---- */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-[15px] py-[10px] rounded-pill
+           bg-ink text-canvas font-medium text-[14px] leading-none tracking-[-0.14px]
+           transition-transform active:scale-[0.97] select-none cursor-pointer
+           whitespace-nowrap;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-[15px] py-[10px] rounded-pill
+           bg-surface-1 text-ink font-medium text-[14px] leading-none tracking-[-0.14px]
+           transition-colors hover:bg-surface-2 active:scale-[0.97] select-none cursor-pointer
+           whitespace-nowrap;
+  }
+  .btn-translucent {
+    @apply inline-flex items-center gap-2 px-[14px] py-[8px] rounded-2xl
+           bg-surface-2 text-ink font-medium text-[14px] leading-none tracking-[-0.14px]
+           transition-colors hover:bg-[rgba(255,255,255,0.12)] select-none cursor-pointer;
+  }
+
+  /* ---- Cards ---- */
+  .card {
+    @apply bg-surface-1 rounded-xl p-6;
+  }
+  .card-featured {
+    @apply bg-surface-2 rounded-xl p-6;
+  }
+  .gradient-card {
+    @apply rounded-2xl p-8;
+  }
+  .gradient-card-violet  { @apply gradient-card bg-gradient-violet; }
+  .gradient-card-magenta { @apply gradient-card bg-gradient-magenta; }
+  .gradient-card-orange  { @apply gradient-card bg-gradient-orange; }
+  .gradient-card-coral   { @apply gradient-card bg-gradient-coral; }
+
+  /* ---- Inputs ---- */
+  .input-field {
+    @apply w-full bg-surface-1 text-ink text-[15px] tracking-[-0.15px]
+           rounded-md px-[14px] py-[10px] border border-hairline
+           placeholder:text-ink-muted
+           focus:outline-none focus:border-accent-blue focus:shadow-elevation-3
+           transition-colors;
+  }
+
+  /* ---- Code block ---- */
+  .code-block {
+    @apply bg-surface-1 rounded-xl p-5 border border-hairline
+           font-mono text-[13px] leading-relaxed overflow-x-auto;
+  }
+
+  /* ---- Dividers ---- */
+  .divider       { @apply border-t border-hairline; }
+  .divider-soft  { @apply border-t border-hairline-soft; }
+
+  /* ---- Container ---- */
+  .container-app {
+    @apply w-full max-w-[1199px] mx-auto px-6;
+  }
+}

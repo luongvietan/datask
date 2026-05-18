@@ -1,0 +1,30 @@
+{
+  "name": "datask-js",
+  "version": "0.1.0",
+  "description": "Official JavaScript/TypeScript SDK for Datask — Web Data API for AI Agents",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["web-scraping", "ai", "agents", "cloudflare", "structured-data"],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "tsup": "^8.3.5"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  }
+}
