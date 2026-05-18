@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Repository cho bảng accounts + oauth_accounts."""
 import secrets
-from datetime import datetime
+from datetime import UTC, datetime
 
 from datask_api.models.db import Account, OAuthAccount
 from sqlalchemy import select, update

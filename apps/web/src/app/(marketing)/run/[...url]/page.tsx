@@ -24,9 +24,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function RunPage({ params }: Props) {
   const { url } = await params;
 
-  // Reconstruct full URL (Next.js strips the leading https:/)
+  // Reconstruct full URL. Browsers normalize `https://` → `https:/` in paths,
+  // so we restore the missing slash before validating.
   const rawUrl = url.join("/");
-  const targetUrl = rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`;
+  const targetUrl = rawUrl.startsWith("http")
+    ? rawUrl.replace(/^(https?:\/)([^/])/, "$1/$2")
+    : `https://${rawUrl}`;
 
   if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
     notFound();
