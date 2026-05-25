@@ -102,6 +102,25 @@ async def extract_url(
                 ).model_dump(),
             )
 
+    # Budget cap check for paid tiers
+    if tier != "free":
+        from datask_api.services.budget import check_budget
+
+        budget_ok, budget_detail = await check_budget(account_id)
+        if not budget_ok:
+            return JSONResponse(
+                status_code=429,
+                content=ErrorResponse(
+                    error=ErrorCode.BUDGET_EXCEEDED,
+                    message=f"Monthly credit budget of {budget_detail['budget']} exceeded.",
+                    detail={
+                        "remaining": budget_detail["remaining"],
+                        "budget": budget_detail["budget"],
+                        "resets_at": budget_detail["resets_at"],
+                    },
+                ).model_dump(),
+            )
+
     remaining = await get_remaining(key_id, tier=tier)
     limit = TIER_BURST_PER_MINUTE.get(tier, TIER_BURST_PER_MINUTE["free"])
 

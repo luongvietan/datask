@@ -29,6 +29,7 @@ class ErrorCode(StrEnum):
     INVALID_URL = "invalid_url"
     INVALID_API_KEY = "invalid_api_key"
     QUOTA_EXCEEDED = "quota_exceeded"
+    BUDGET_EXCEEDED = "budget_exceeded"
     RATE_LIMITED = "rate_limited"
     INVALID_SCHEMA = "invalid_schema"
     FETCH_FAILED = "fetch_failed"
@@ -212,7 +213,7 @@ class ExtractResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: ErrorCode
     message: str
-    detail: str | None = None
+    detail: Any | None = None
     retry_after: int | None = None       # seconds, for 429
     upgrade_url: str | None = None       # for 402
 

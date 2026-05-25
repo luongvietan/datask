@@ -34,6 +34,8 @@ class Account(Base):
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     stripe_billing_anchor: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_reported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    monthly_credit_budget: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    budget_alert_threshold: Mapped[int] = mapped_column(Integer, default=80)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

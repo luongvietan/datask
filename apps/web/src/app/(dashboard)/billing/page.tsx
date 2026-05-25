@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BillingTierCard } from "@/components/dashboard/BillingTierCard";
+import { BudgetSettingsCard } from "@/components/dashboard/BudgetSettingsCard";
 import { InvoicesList } from "@/components/dashboard/InvoicesList";
 import { UpgradeButton } from "@/components/dashboard/UpgradeButton";
 
@@ -16,6 +17,7 @@ export default function BillingPage() {
         <UpgradeButton />
       </div>
       <BillingTierCard />
+      <BudgetSettingsCard />
       <InvoicesList />
     </div>
   );

@@ -33,4 +33,20 @@ async def poll_job(
                 message=f"Job {job_id} not found.",
             ).model_dump(),
         )
-    return JSONResponse(content=status)
+
+    # Ownership check: job.meta.account_id must match current key's account_id
+    job_account_id = status.get("meta", {}).get("account_id")
+    current_account_id = _current_key.get("account_id")
+
+    if job_account_id != current_account_id:
+        return JSONResponse(
+            status_code=403,
+            content=ErrorResponse(
+                error=ErrorCode.INTERNAL_ERROR,
+                message="Job not found.",
+            ).model_dump(),
+        )
+
+    # Remove meta from response (internal use only)
+    response_data = {k: v for k, v in status.items() if k != "meta"}
+    return JSONResponse(content=response_data)

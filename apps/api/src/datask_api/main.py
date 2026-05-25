@@ -10,7 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from datask_api.middleware.request_context import RequestContextMiddleware
-from datask_api.routes import auth, billing, extract, fetch, health, jobs, keys, webhooks
+from datask_api.routes import (
+    auth,
+    billing,
+    extract,
+    fetch,
+    health,
+    jobs,
+    keys,
+    requests,
+    webhooks,
+)
 
 logger = structlog.get_logger()
 
@@ -65,6 +75,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix="/v1", tags=["Auth"])
     app.include_router(jobs.router, prefix="/v1", tags=["Async Jobs"])
     app.include_router(webhooks.router, prefix="/v1", tags=["Webhooks"])
+    app.include_router(requests.router, prefix="/v1", tags=["Request Log"])
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request, exc):  # type: ignore[no-untyped-def]

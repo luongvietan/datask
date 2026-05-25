@@ -153,3 +153,68 @@ async def sum_credits_since(session: AsyncSession, account_id: str, since: datet
         )
     )
     return result.scalar_one() or 0
+
+
+async def list_requests(
+    session: AsyncSession,
+    account_id: str,
+    limit: int = 50,
+    offset: int = 0,
+    layer: int | None = None,
+    success: bool | None = None,
+) -> dict[str, Any]:
+    """
+    Paginated list của requests với optional filters.
+    Returns: {"requests": [...], "total": N}
+    """
+    # Base query conditions
+    conditions = [UsageRecord.account_id == account_id]
+    
+    if layer is not None:
+        conditions.append(UsageRecord.layer == layer)
+    if success is not None:
+        conditions.append(UsageRecord.success == success)
+    
+    # Count total
+    count_query = select(func.count(UsageRecord.id)).where(*conditions)
+    total_result = await session.execute(count_query)
+    total = total_result.scalar_one() or 0
+    
+    # Fetch paginated results
+    data_query = (
+        select(
+            UsageRecord.request_id,
+            UsageRecord.url,
+            UsageRecord.domain,
+            UsageRecord.layer,
+            UsageRecord.success,
+            UsageRecord.credits_used,
+            UsageRecord.response_time_ms,
+            UsageRecord.validation_valid,
+            UsageRecord.created_at,
+        )
+        .where(*conditions)
+        .order_by(UsageRecord.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    
+    result = await session.execute(data_query)
+    rows = result.all()
+    
+    requests = [
+        {
+            "request_id": row.request_id,
+            "url": row.url,
+            "domain": row.domain,
+            "layer": row.layer,
+            "success": row.success,
+            "credits_used": row.credits_used,
+            "response_time_ms": row.response_time_ms,
+            "validation_valid": row.validation_valid,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+        }
+        for row in rows
+    ]
+    
+    return {"requests": requests, "total": total}

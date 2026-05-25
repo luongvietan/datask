@@ -277,3 +277,131 @@ async def test_sum_credits_since_billable_only(db_session: AsyncSession) -> None
     since = datetime.now(UTC) - timedelta(hours=1)
     total = await usage_repo.sum_credits_since(db_session, account.id, since)
     assert total == 3  # 1 + 2, ignoring credits=0 rows
+
+
+@pytest.mark.asyncio
+async def test_list_requests_paginated(db_session: AsyncSession) -> None:
+    """list_requests() trả về paginated results với filters."""
+    account = await accounts_repo.create(db_session, email="paginated@example.com")
+    await db_session.commit()
+
+    # Tạo 10 requests với different layers và success status
+    for i in range(10):
+        await usage_repo.insert_record(
+            db_session,
+            account_id=account.id,
+            api_key_id=None,
+            url=f"https://example{i}.com/page",
+            layer=(i % 3) + 1,  # 1, 2, 3, 1, 2, 3...
+            success=(i % 2 == 0),  # alternating
+            credits_used=1,
+            request_id=f"req_{i:03d}",
+            domain=f"example{i}.com",
+            response_time_ms=100 * (i + 1),
+            validation_valid=(i % 2 == 0),
+        )
+    await db_session.commit()
+
+    # Test basic pagination - limit 5, offset 0
+    result = await usage_repo.list_requests(
+        db_session, account_id=account.id, limit=5, offset=0
+    )
+    assert len(result["requests"]) == 5
+    assert result["total"] == 10
+    # Kiểm tra fields trả về
+    first = result["requests"][0]
+    assert "request_id" in first
+    assert "url" in first
+    assert "layer" in first
+    assert "success" in first
+
+    # Test offset
+    result2 = await usage_repo.list_requests(
+        db_session, account_id=account.id, limit=5, offset=5
+    )
+    assert len(result2["requests"]) == 5
+    assert result2["total"] == 10
+    # Đảm bảo không trùng
+    ids1 = {r["request_id"] for r in result["requests"]}
+    ids2 = {r["request_id"] for r in result2["requests"]}
+    assert ids1.isdisjoint(ids2)
+
+
+@pytest.mark.asyncio
+async def test_list_requests_filter_by_layer(db_session: AsyncSession) -> None:
+    """list_requests() filter theo layer."""
+    account = await accounts_repo.create(db_session, email="filter-layer@example.com")
+    await db_session.commit()
+
+    await usage_repo.insert_record(
+        db_session, account_id=account.id, api_key_id=None,
+        url="https://l1.com", layer=1, success=True, request_id="req_l1"
+    )
+    await usage_repo.insert_record(
+        db_session, account_id=account.id, api_key_id=None,
+        url="https://l2.com", layer=2, success=True, request_id="req_l2"
+    )
+    await usage_repo.insert_record(
+        db_session, account_id=account.id, api_key_id=None,
+        url="https://l3.com", layer=3, success=True, request_id="req_l3"
+    )
+    await db_session.commit()
+
+    result = await usage_repo.list_requests(
+        db_session, account_id=account.id, limit=50, offset=0, layer=2
+    )
+    assert result["total"] == 1
+    assert result["requests"][0]["layer"] == 2
+
+
+@pytest.mark.asyncio
+async def test_list_requests_filter_by_success(db_session: AsyncSession) -> None:
+    """list_requests() filter theo success status."""
+    account = await accounts_repo.create(db_session, email="filter-success@example.com")
+    await db_session.commit()
+
+    await usage_repo.insert_record(
+        db_session, account_id=account.id, api_key_id=None,
+        url="https://ok.com", layer=2, success=True, request_id="req_ok"
+    )
+    await usage_repo.insert_record(
+        db_session, account_id=account.id, api_key_id=None,
+        url="https://fail.com", layer=2, success=False, request_id="req_fail"
+    )
+    await db_session.commit()
+
+    result = await usage_repo.list_requests(
+        db_session, account_id=account.id, limit=50, offset=0, success=True
+    )
+    assert result["total"] == 1
+    assert result["requests"][0]["success"] is True
+
+    result = await usage_repo.list_requests(
+        db_session, account_id=account.id, limit=50, offset=0, success=False
+    )
+    assert result["total"] == 1
+    assert result["requests"][0]["success"] is False
+
+
+@pytest.mark.asyncio
+async def test_list_requests_account_isolation(db_session: AsyncSession) -> None:
+    """list_requests() chỉ trả về requests của account đó."""
+    acc1 = await accounts_repo.create(db_session, email="acc1@example.com")
+    acc2 = await accounts_repo.create(db_session, email="acc2@example.com")
+    await db_session.commit()
+
+    await usage_repo.insert_record(
+        db_session, account_id=acc1.id, api_key_id=None,
+        url="https://acc1.com", layer=1, success=True, request_id="req_acc1"
+    )
+    await usage_repo.insert_record(
+        db_session, account_id=acc2.id, api_key_id=None,
+        url="https://acc2.com", layer=1, success=True, request_id="req_acc2"
+    )
+    await db_session.commit()
+
+    result = await usage_repo.list_requests(
+        db_session, account_id=acc1.id, limit=50, offset=0
+    )
+    assert result["total"] == 1
+    assert result["requests"][0]["request_id"] == "req_acc1"

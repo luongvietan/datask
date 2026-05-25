@@ -44,6 +44,33 @@ def _extract_domain(url: str) -> str | None:
         return None
 
 
+def _increment_budget_redis(account_id: str, credits: int) -> None:
+    """Increment Redis budget counter for real-time tracking. Fire-and-forget."""
+    if credits <= 0:
+        return
+    try:
+        import os
+        from datetime import UTC, datetime
+        from calendar import monthrange
+
+        import redis as sync_redis
+
+        redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+        r = sync_redis.from_url(redis_url, decode_responses=True)
+        now = datetime.now(UTC)
+        key = f"budget:{account_id}:{now.strftime('%Y-%m')}"
+        _, last_day = monthrange(now.year, now.month)
+        end_of_month = now.replace(day=last_day, hour=23, minute=59, second=59, microsecond=0)
+        ttl = int((end_of_month - now).total_seconds())
+
+        pipe = r.pipeline()
+        pipe.incrby(key, credits)
+        pipe.expire(key, max(ttl, 86400))
+        pipe.execute()
+    except Exception as e:
+        logger.debug("budget_redis_increment_failed", error=str(e))
+
+
 def record_usage(
     account_id: str | None,
     api_key_id: str | None,
@@ -63,6 +90,7 @@ def record_usage(
     """
     Ghi usage record. Fire-and-forget — lỗi không làm fail job.
     account_id=None cho Layer 1 anonymous requests.
+    Also increments Redis budget counter for real-time budget tracking.
     """
     if account_id is None:
         return
@@ -89,6 +117,8 @@ def record_usage(
                 metadata_=metadata,
             )
             session.add(record)
+
+        _increment_budget_redis(account_id, credits_used)
 
         logger.debug(
             "usage_recorded",

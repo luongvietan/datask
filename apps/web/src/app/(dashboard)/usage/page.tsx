@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { BudgetProgressBar } from "@/components/dashboard/BudgetProgressBar";
 import { UsageBreakdownChart } from "@/components/dashboard/UsageBreakdownChart";
 import { DomainBreakdownTable } from "@/components/dashboard/DomainBreakdownTable";
 import { LayerBreakdownChart } from "@/components/dashboard/LayerBreakdownChart";
+import { RecentRequestsTable } from "@/components/dashboard/RecentRequestsTable";
 
 export const metadata: Metadata = { title: "Usage" };
 
@@ -14,10 +16,12 @@ export default function UsagePage() {
           Requests, success rates, and domain breakdown
         </p>
       </div>
+      <BudgetProgressBar />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <UsageBreakdownChart />
         <LayerBreakdownChart />
       </div>
+      <RecentRequestsTable />
       <DomainBreakdownTable />
     </div>
   );

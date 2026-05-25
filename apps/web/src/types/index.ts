@@ -34,6 +34,23 @@ export interface UsageRecord {
   created_at: string;
 }
 
+export interface RequestLogItem {
+  request_id: string | null;
+  url: string;
+  domain: string | null;
+  layer: Layer;
+  success: boolean;
+  credits_used: number;
+  response_time_ms: number | null;
+  validation_valid: boolean | null;
+  created_at: string | null;
+}
+
+export interface RequestLogResponse {
+  requests: RequestLogItem[];
+  total: number;
+}
+
 export interface UsageSummary {
   current_month_requests: number;
   successful_requests: number;

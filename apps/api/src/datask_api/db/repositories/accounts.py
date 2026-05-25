@@ -90,3 +90,18 @@ async def update_tier(
         values["stripe_billing_anchor"] = stripe_billing_anchor
 
     await session.execute(update(Account).where(Account.id == account_id).values(**values))
+
+
+async def update_budget(
+    session: AsyncSession,
+    account_id: str,
+    monthly_credit_budget: int | None,
+    budget_alert_threshold: int = 80,
+) -> None:
+    """Cập nhật monthly credit budget cap cho account."""
+    values: dict = {
+        "monthly_credit_budget": monthly_credit_budget,
+        "budget_alert_threshold": budget_alert_threshold,
+        "updated_at": datetime.utcnow(),
+    }
+    await session.execute(update(Account).where(Account.id == account_id).values(**values))

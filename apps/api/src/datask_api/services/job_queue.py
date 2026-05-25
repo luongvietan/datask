@@ -59,6 +59,10 @@ async def enqueue_fetch_job(
         result_ttl=120,
     )
 
+    # Set ownership metadata for job polling security
+    job.meta = {"account_id": account_id, "request_id": request_id}
+    await asyncio.to_thread(job.save_meta)
+
     deadline = time.monotonic() + 30
     while time.monotonic() < deadline:
         await asyncio.to_thread(job.refresh)
@@ -106,6 +110,10 @@ async def enqueue_extract_job(
         result_ttl=300,
     )
 
+    # Set ownership metadata for job polling security
+    job.meta = {"account_id": account_id, "request_id": request_id}
+    await asyncio.to_thread(job.save_meta)
+
     if is_async:
         return JSONResponse(
             status_code=202,
@@ -133,7 +141,7 @@ async def enqueue_extract_job(
 
 
 async def get_job_status(job_id: str) -> dict[str, Any] | None:
-    """Poll job status từ RQ."""
+    """Poll job status từ RQ. Returns None if job not found. Includes meta.account_id for ownership check."""
     try:
         q = await asyncio.to_thread(_get_queue)
         job: Job = await asyncio.to_thread(Job.fetch, job_id, connection=q.connection)
@@ -157,6 +165,7 @@ async def get_job_status(job_id: str) -> dict[str, Any] | None:
             "status": status,
             "result": result,
             "created_at": job.created_at.isoformat() if job.created_at else None,
+            "meta": job.meta or {},
         }
     except Exception:
         return None
