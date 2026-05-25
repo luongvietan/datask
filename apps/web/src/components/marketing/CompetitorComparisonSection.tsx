@@ -1,6 +1,7 @@
 import { Fragment } from "react";
+import Link from "next/link";
 import { Icon, type IconProp } from "@/components/ui/Icon";
-import { ValidationIcon, AlertCircleIcon, StarIcon, CancelCircleIcon } from "@hugeicons/core-free-icons";
+import { ValidationIcon, AlertCircleIcon, StarIcon, CancelCircleIcon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 const COMPETITORS = ["Firecrawl", "Jina Reader", "Apify", "ScrapingBee", "Datask"];
 
@@ -244,8 +245,27 @@ export function CompetitorComparisonSection() {
           </table>
         </div>
 
+        {/* Benchmark link */}
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 bg-surface-1 rounded-xl p-5 border border-hairline">
+          <div>
+            <p className="text-body font-medium text-ink">
+              Datask vs Firecrawl — Turnstile Benchmark 2026
+            </p>
+            <p className="text-caption text-ink-muted mt-1">
+              93.3% vs 30% success rate on 30 protected sites. See full results and methodology.
+            </p>
+          </div>
+          <Link
+            href="/blog/turnstile-benchmark-2026"
+            className="inline-flex items-center gap-1.5 text-caption font-medium text-accent-blue hover:underline whitespace-nowrap shrink-0"
+          >
+            View benchmark
+            <Icon icon={ArrowRight01Icon as IconProp} size={13} />
+          </Link>
+        </div>
+
         {/* Callout strip */}
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
             {
               label: "vs Firecrawl",

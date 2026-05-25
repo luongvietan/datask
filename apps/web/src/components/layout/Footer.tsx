@@ -7,6 +7,7 @@ const FOOTER_COLUMNS = [
       { href: "/", label: "Home" },
       { href: "/pricing", label: "Pricing" },
       { href: "/docs", label: "Docs" },
+      { href: "/blog/turnstile-benchmark-2026", label: "Benchmark" },
     ],
   },
   {

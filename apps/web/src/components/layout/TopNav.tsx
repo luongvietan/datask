@@ -2,12 +2,13 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/Button";
 import { Icon, type IconProp } from "@/components/ui/Icon";
-import { CreditCardIcon, BookOpenTextIcon, LayoutGridIcon } from "@hugeicons/core-free-icons";
+import { CreditCardIcon, BookOpenTextIcon, LayoutGridIcon, NewsIcon } from "@hugeicons/core-free-icons";
 import { MobileMenu } from "./MobileMenu";
 
 const NAV_LINKS: { href: string; label: string; icon: IconProp }[] = [
   { href: "/pricing", label: "Pricing", icon: CreditCardIcon as IconProp },
   { href: "/docs", label: "Docs", icon: BookOpenTextIcon as IconProp },
+  { href: "/blog/turnstile-benchmark-2026", label: "Benchmark", icon: NewsIcon as IconProp },
 ];
 
 export async function TopNav() {

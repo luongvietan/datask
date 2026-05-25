@@ -11,6 +11,7 @@ import {
   BookOpenTextIcon,
   LayoutGridIcon,
   Logout01Icon,
+  NewsIcon,
 } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/Button";
 
@@ -50,6 +51,14 @@ export function MobileMenu({ isLoggedIn, userName }: MobileMenuProps) {
             >
               <Icon icon={BookOpenTextIcon as IconProp} size={18} />
               Docs
+            </Link>
+            <Link
+              href="/blog/turnstile-benchmark-2026"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-3 text-[18px] font-medium text-ink hover:text-accent-blue transition-colors"
+            >
+              <Icon icon={NewsIcon as IconProp} size={18} />
+              Benchmark
             </Link>
 
             <hr className="border-hairline-soft my-2" />
