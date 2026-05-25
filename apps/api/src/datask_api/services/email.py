@@ -47,3 +47,52 @@ async def send_quota_alert(account_id: str, email: str, pct: int, tier: str) -> 
     else:
         # Development: log thay vì gửi email
         logger.info("quota_alert_console", account_id=account_id, email=email, pct=pct, subject=subject)
+
+
+async def send_budget_alert(account_id: str, email: str, pct: int, budget: int, used: int) -> None:
+    """
+    Gửi email cảnh báo khi PAYG budget đạt threshold (80% hoặc 100%).
+    pct = alert_threshold (thường 80) hoặc 100.
+    """
+    if pct >= 100:
+        subject = f"[Datask] Budget exceeded — {used}/{budget} credits used"
+        body = (
+            f"Hi,\n\n"
+            f"You've used {used} out of {budget} credits this month ({pct}%).\n"
+            f"New requests will be blocked until your budget resets or you increase it.\n\n"
+            f"Manage your budget: https://datask.run/dashboard/billing\n\n"
+            f"— The Datask Team"
+        )
+    else:
+        subject = f"[Datask] You've used {pct}% of your monthly budget"
+        body = (
+            f"Hi,\n\n"
+            f"You've used {pct}% of your monthly Datask budget ({used}/{budget} credits).\n\n"
+            f"Consider increasing your budget to avoid interruptions: https://datask.run/dashboard/billing\n\n"
+            f"— The Datask Team"
+        )
+
+    resend_api_key = os.environ.get("RESEND_API_KEY", "")
+
+    if resend_api_key:
+        try:
+            import httpx
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    "https://api.resend.com/emails",
+                    headers={"Authorization": f"Bearer {resend_api_key}"},
+                    json={
+                        "from": "Datask <noreply@datask.run>",
+                        "to": [email],
+                        "subject": subject,
+                        "text": body,
+                    },
+                )
+                if response.is_success:
+                    logger.info("budget_alert_sent", account_id=account_id, pct=pct)
+                else:
+                    logger.warning("budget_alert_failed", account_id=account_id, status=response.status_code)
+        except Exception as e:
+            logger.error("budget_alert_error", account_id=account_id, error=str(e))
+    else:
+        logger.info("budget_alert_console", account_id=account_id, email=email, pct=pct, subject=subject)

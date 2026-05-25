@@ -286,6 +286,7 @@ def run_extract(
             pass
 
         _check_quota_alert(account_id=account_id)
+        _check_budget_alert(account_id=account_id, credits_used=credits_used)
 
     result: dict[str, Any] = {
         "data": data,
@@ -363,3 +364,112 @@ def _check_quota_alert(account_id: str) -> None:
                 )
     except Exception as e:
         logger.warning("quota_alert_check_failed", error=str(e))
+
+
+def _check_budget_alert(account_id: str, credits_used: int) -> None:
+    """Check PAYG budget thresholds and send email alert. Sync version for worker."""
+    if credits_used <= 0:
+        return
+    try:
+        from sqlalchemy import text
+
+        from datask_worker.db import get_session
+
+        with get_session() as session:
+            row = session.execute(
+                text(
+                    "SELECT tier, email, monthly_credit_budget, budget_alert_threshold "
+                    "FROM accounts WHERE id = :id"
+                ),
+                {"id": account_id},
+            ).fetchone()
+
+            if not row or row.tier == "free":
+                return
+
+            budget = row.monthly_credit_budget
+            if not budget or budget == 0:
+                return
+
+            threshold = row.budget_alert_threshold or 80
+            email = row.email
+
+            now = datetime.now(UTC)
+            month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+            total_credits = session.execute(
+                text(
+                    "SELECT COALESCE(SUM(credits_used), 0) FROM usage_records "
+                    "WHERE account_id = :id AND credits_used > 0 AND created_at >= :month_start"
+                ),
+                {"id": account_id, "month_start": month_start},
+            ).scalar() or 0
+
+        pct = int((total_credits / budget) * 100) if budget > 0 else 0
+
+        level = None
+        if pct >= 100:
+            level = "exceeded"
+        elif pct >= threshold:
+            level = "warning"
+
+        if not level:
+            return
+
+        import redis as sync_redis
+
+        r = sync_redis.from_url(
+            os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
+            decode_responses=True,
+        )
+
+        alert_key = f"budget:alert:{level}:{account_id}:{now.strftime('%Y-%m')}"
+        if not r.exists(alert_key):
+            from calendar import monthrange
+
+            _, last_day = monthrange(now.year, now.month)
+            end_of_month = now.replace(day=last_day, hour=23, minute=59, second=59, microsecond=0)
+            ttl = int((end_of_month - now).total_seconds())
+            r.setex(alert_key, max(ttl, 86400), "sent")
+
+            if pct >= 100:
+                subject = f"[Datask] Budget exceeded — {total_credits}/{budget} credits used"
+                body = (
+                    f"Hi,\n\n"
+                    f"You've used {total_credits} out of {budget} credits this month ({pct}%).\n"
+                    f"New requests will be blocked until your budget resets or you increase it.\n\n"
+                    f"Manage your budget: https://datask.run/dashboard/billing\n\n"
+                    f"— The Datask Team"
+                )
+            else:
+                subject = f"[Datask] You've used {pct}% of your monthly budget"
+                body = (
+                    f"Hi,\n\n"
+                    f"You've used {pct}% of your monthly Datask budget ({total_credits}/{budget} credits).\n\n"
+                    f"Consider increasing your budget to avoid interruptions: https://datask.run/dashboard/billing\n\n"
+                    f"— The Datask Team"
+                )
+
+            resend_api_key = os.environ.get("RESEND_API_KEY", "")
+            if resend_api_key:
+                import httpx
+                with httpx.Client() as client:
+                    resp = client.post(
+                        "https://api.resend.com/emails",
+                        headers={"Authorization": f"Bearer {resend_api_key}"},
+                        json={
+                            "from": "Datask <noreply@datask.run>",
+                            "to": [email],
+                            "subject": subject,
+                            "text": body,
+                        },
+                    )
+                    if resp.is_success:
+                        logger.info("budget_alert_sent", account_id=account_id, level=level, pct=pct)
+                    else:
+                        logger.warning("budget_alert_failed", account_id=account_id, status=resp.status_code)
+            else:
+                logger.info("budget_alert_console", account_id=account_id, email=email, level=level, pct=pct, subject=subject)
+
+    except Exception as e:
+        logger.warning("budget_alert_check_failed", error=str(e))

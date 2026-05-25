@@ -92,12 +92,20 @@ async def get_budget_usage(account_id: str) -> dict:
             used = await usage_repo.sum_credits_current_month(session, account_id)
 
     remaining = max(0, budget - used)
+    pct = int((used / budget) * 100) if budget > 0 else 0
+    alert_level = "none"
+    if pct >= 100:
+        alert_level = "exceeded"
+    elif pct >= alert_threshold:
+        alert_level = "warning"
+
     return {
         "used": used,
         "budget": budget,
         "remaining": remaining,
         "resets_at": _resets_at().isoformat(),
         "alert_threshold": alert_threshold,
+        "alert_level": alert_level,
     }
 
 
@@ -165,3 +173,98 @@ async def increment_budget(account_id: str, credits: int) -> None:
         await pipe.execute()
     except Exception as exc:
         logger.warning("Budget increment failed (non-fatal): %s", exc)
+
+
+def _budget_alert_dedup_key(account_id: str, level: str) -> str:
+    """Redis key để dedup budget alert: budget:alert:{level}:{account_id}:{YYYY-MM}"""
+    now = datetime.now(UTC)
+    return f"budget:alert:{level}:{account_id}:{now.strftime('%Y-%m')}"
+
+
+async def check_budget_alerts(account_id: str) -> str:
+    """
+    Kiểm tra và gửi budget alert nếu đạt threshold.
+    Returns: alert_level = "none" | "warning" | "exceeded"
+
+    Flow:
+    1. Lấy account info (budget, threshold, email, tier)
+    2. Tính % usage hiện tại từ Redis/Postgres
+    3. Nếu >= 100% → level = "exceeded"
+    4. Nếu >= threshold% (default 80) → level = "warning"
+    5. Check Redis dedup key để tránh spam
+    6. Gửi email alert nếu chưa gửi trong tháng
+    """
+    from datask_api.services.email import send_budget_alert
+
+    factory = get_session_factory()
+    async with factory() as session:
+        account = await accounts_repo.get_by_id(session, account_id)
+        if not account:
+            return "none"
+
+        budget = account.monthly_credit_budget
+        if budget is None or budget == 0:
+            return "none"
+
+        if account.tier == "free":
+            return "none"
+
+        email = account.email
+        threshold = account.budget_alert_threshold
+
+    redis = await _get_redis()
+    used = 0
+
+    if redis is not None:
+        try:
+            key = _budget_key(account_id)
+            val = await redis.get(key)
+            used = int(val) if val else 0
+        except Exception:
+            redis = None
+
+    if redis is None:
+        async with factory() as session:
+            used = await usage_repo.sum_credits_current_month(session, account_id)
+
+    pct = int((used / budget) * 100) if budget > 0 else 0
+
+    if pct >= 100:
+        level = "exceeded"
+    elif pct >= threshold:
+        level = "warning"
+    else:
+        return "none"
+
+    if redis is None:
+        logger.warning("budget_alert_check_no_redis", account_id=account_id, level=level)
+        return level
+
+    try:
+        dedup_key = _budget_alert_dedup_key(account_id, level)
+        already_sent = await redis.exists(dedup_key)
+
+        if already_sent:
+            logger.debug("budget_alert_already_sent", account_id=account_id, level=level)
+            return level
+
+        await send_budget_alert(
+            account_id=account_id,
+            email=email,
+            pct=pct,
+            budget=budget,
+            used=used,
+        )
+
+        now = datetime.now(UTC)
+        _, last_day = monthrange(now.year, now.month)
+        end_of_month = now.replace(day=last_day, hour=23, minute=59, second=59, microsecond=0)
+        ttl = int((end_of_month - now).total_seconds())
+
+        await redis.setex(dedup_key, max(ttl, 86400), "sent")
+        logger.info("budget_alert_sent", account_id=account_id, level=level, pct=pct)
+
+    except Exception as exc:
+        logger.warning("budget_alert_dedup_failed", account_id=account_id, error=str(exc))
+
+    return level

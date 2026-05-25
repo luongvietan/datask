@@ -1,0 +1,31 @@
+url,category,name
+https://www.cloudflare.com/products/turnstile/,turnstile,Cloudflare Turnstile Product
+https://challenges.cloudflare.com/demo,turnstile,CF Turnstile Demo
+https://dash.cloudflare.com/sign-up,turnstile,Cloudflare Dashboard Signup
+https://www.hcaptcha.com/,turnstile,hCaptcha Homepage
+https://developers.cloudflare.com/turnstile/,turnstile,CF Turnstile Docs
+https://www.perplexity.ai/,turnstile,Perplexity AI
+https://chat.openai.com/,turnstile,ChatGPT Login
+https://www.anthropic.com/,turnstile,Anthropic
+https://www.discord.com/login,turnstile,Discord Login
+https://www.reddit.com/login/,turnstile,Reddit Login
+https://github.com/login,turnstile,GitHub Login
+https://www.shopify.com/login,turnstile,Shopify Login
+https://www.canva.com/login,turnstile,Canva Login
+https://www.notion.so/login,turnstile,Notion Login
+https://www.figma.com/login,turnstile,Figma Login
+https://vercel.com/login,turnstile,Vercel Login
+https://www.netlify.com/login,turnstile,Netlify Login
+https://app.clickup.com/login,turnstile,ClickUp Login
+https://www.linear.app/login,turnstile,Linear Login
+https://arc.net/,turnstile,Arc Browser
+https://www.amazon.com/dp/B0D1XD1ZV3,ecommerce,Amazon Product Page
+https://www.ebay.com/itm/235123456789,ecommerce,eBay Listing
+https://www.etsy.com/listing/1234567890,ecommerce,Etsy Listing
+https://www.walmart.com/ip/123456789,ecommerce,Walmart Product
+https://www.bestbuy.com/site/searchpage.jsp?st=laptop,ecommerce,BestBuy Search
+https://www.target.com/c/electronics/-/N-5xtg6,ecommerce,Target Category
+https://www.newegg.com/p/1TS-000D-073H5,ecommerce,Newegg Product
+https://www.aliexpress.com/item/1005006123456.html,ecommerce,AliExpress Product
+https://www.zalando.com/catalog/?catalog=women,ecommerce,Zalando Catalog
+https://www.lazada.co.id/catalog/?q=sepatu,ecommerce,Lazada Search

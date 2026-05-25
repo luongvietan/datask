@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BudgetAlertBanner } from "@/components/dashboard/BudgetAlertBanner";
 import { BudgetProgressBar } from "@/components/dashboard/BudgetProgressBar";
 import { UsageBreakdownChart } from "@/components/dashboard/UsageBreakdownChart";
 import { DomainBreakdownTable } from "@/components/dashboard/DomainBreakdownTable";
@@ -16,6 +17,7 @@ export default function UsagePage() {
           Requests, success rates, and domain breakdown
         </p>
       </div>
+      <BudgetAlertBanner />
       <BudgetProgressBar />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <UsageBreakdownChart />
