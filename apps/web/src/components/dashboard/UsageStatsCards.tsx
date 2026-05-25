@@ -3,6 +3,13 @@
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import {
+  AnalyticsUpIcon,
+  ValidationIcon,
+  Coins01Icon,
+  CreditCardIcon,
+} from "@hugeicons/core-free-icons";
 import { useUsage } from "@/hooks/useUsage";
 import { useSessionKey } from "@/hooks/useSessionKey";
 
@@ -58,6 +65,7 @@ export function UsageStatsCards() {
       label: "Requests this month",
       value: usage.current_month_requests.toLocaleString(),
       sub: quotaLabel,
+      icon: AnalyticsUpIcon as IconProp,
       badge:
         quotaPct !== null
           ? {
@@ -73,6 +81,7 @@ export function UsageStatsCards() {
       label: "Success rate",
       value: `${successRate}%`,
       sub: `${usage.successful_requests} succeeded · ${usage.failed_requests} failed`,
+      icon: ValidationIcon as IconProp,
       badge:
         parseFloat(successRate) >= 95
           ? { label: "Healthy", variant: "success" as const }
@@ -82,11 +91,13 @@ export function UsageStatsCards() {
       label: "Credits used",
       value: usage.credits_used.toLocaleString(),
       sub: `Tier: ${usage.tier}`,
+      icon: Coins01Icon as IconProp,
     },
     {
       label: "Current tier",
       value: usage.tier === "free" ? "Free" : "PAYG",
       sub: usage.billing_period_end ? `Billing ends ${usage.billing_period_end.slice(0, 10)}` : "No billing cycle",
+      icon: CreditCardIcon as IconProp,
       badge:
         usage.tier === "free"
           ? { label: "Free", variant: "info" as const }
@@ -98,7 +109,10 @@ export function UsageStatsCards() {
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       {stats.map((stat) => (
         <Card key={stat.label} className="flex flex-col gap-3">
-          <p className="text-caption text-ink-muted">{stat.label}</p>
+          <div className="flex items-center gap-2">
+            <Icon icon={stat.icon} size={16} className="text-accent-blue shrink-0" />
+            <p className="text-caption text-ink-muted">{stat.label}</p>
+          </div>
           <div className="flex items-end gap-2">
             <span className="text-display-md text-ink">{stat.value}</span>
             {stat.badge && (

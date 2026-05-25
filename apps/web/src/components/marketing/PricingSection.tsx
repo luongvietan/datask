@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { Tick01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 interface PricingTier {
   name: string;
@@ -96,7 +98,7 @@ export function PricingSection({ showFullPage = false }: { showFullPage?: boolea
               <ul className="space-y-2 flex-1">
                 {tier.features.map((f) => (
                   <li key={f} className="text-caption text-ink-muted flex items-start gap-2">
-                    <span className="text-success-green mt-0.5">✓</span>
+                    <Icon icon={Tick01Icon as IconProp} size={14} className="text-success-green mt-0.5 shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -115,10 +117,11 @@ export function PricingSection({ showFullPage = false }: { showFullPage?: boolea
         </div>
 
         {!showFullPage && (
-          <p className="text-caption text-ink-muted mt-8 text-center">
-            Need 100K+ req/month?{" "}
-            <a href="mailto:hi@datask.run" className="text-accent-blue hover:underline">
-              Contact us for commit pricing →
+          <p className="text-caption text-ink-muted mt-8 text-center flex items-center justify-center gap-1 flex-wrap">
+            <span>Need 100K+ req/month?</span>
+            <a href="mailto:hi@datask.run" className="text-accent-blue hover:underline inline-flex items-center gap-1">
+              Contact us for commit pricing
+              <Icon icon={ArrowRight01Icon as IconProp} size={12} />
             </a>
           </p>
         )}

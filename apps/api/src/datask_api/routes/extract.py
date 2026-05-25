@@ -4,11 +4,13 @@ Layer 2/3 — POST /v1/extract
 Requires API key. Layer 2 = schema, Layer 3 = prompt.
 """
 from datask_core.config import get_settings
-from datask_core.models import ErrorCode, ErrorResponse, ExtractRequest, ExtractResponse
+from datask_core.models import ErrorCode, ErrorResponse, ExtractRequest, ExtractResponse, ExtractionMode
+from datask_core.schema_validator import normalize_input_schema, validate_input_schema
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
 from datask_api.middleware.auth import get_current_key
+from datask_api.middleware.request_context import get_request_id
 from datask_api.services.job_queue import enqueue_extract_job
 from datask_api.services.rate_limiter import TIER_BURST_PER_MINUTE, check_key_rate_limit, get_remaining
 from datask_api.db.repositories import usage as usage_repo
@@ -21,6 +23,7 @@ router = APIRouter()
     "/extract",
     response_model=ExtractResponse,
     responses={
+        400: {"model": ErrorResponse},
         401: {"model": ErrorResponse},
         402: {"model": ErrorResponse},
         429: {"model": ErrorResponse},
@@ -38,7 +41,33 @@ async def extract_url(
     account_id = api_key_record["account_id"]
     tier = api_key_record.get("tier", "free")
 
-    # Rate limit check
+    # payload.url already validated by Pydantic model — no duplicate check needed
+
+    if payload.mode is None:
+        return JSONResponse(
+            status_code=422,
+            content=ErrorResponse(
+                error=ErrorCode.INVALID_SCHEMA,
+                message="Request must include either 'schema' (Layer 2) or 'prompt' (Layer 3).",
+            ).model_dump(),
+        )
+
+    schema_payload = payload.schema_
+    if payload.mode == ExtractionMode.SCHEMA and schema_payload is not None:
+        schema_result = validate_input_schema(schema_payload)
+        if not schema_result.valid:
+            detail = "; ".join(f"{err.field}: {err.message}" for err in schema_result.errors)
+            return JSONResponse(
+                status_code=400,
+                content=ErrorResponse(
+                    error=ErrorCode.INVALID_SCHEMA,
+                    message="Invalid extraction schema.",
+                    detail=detail,
+                ).model_dump(),
+            )
+        schema_payload = normalize_input_schema(schema_payload)
+
+    # Rate limit check — after auth + schema validation
     allowed, retry_after = await check_key_rate_limit(key_id, tier=tier)
 
     if not allowed:
@@ -54,17 +83,6 @@ async def extract_url(
                 error=ErrorCode.RATE_LIMITED,
                 message="Rate limit exceeded.",
                 retry_after=retry_after,
-            ).model_dump(),
-        )
-
-    # payload.url already validated by Pydantic model — no duplicate check needed
-
-    if payload.mode is None:
-        return JSONResponse(
-            status_code=422,
-            content=ErrorResponse(
-                error=ErrorCode.INVALID_SCHEMA,
-                message="Request must include either 'schema' (Layer 2) or 'prompt' (Layer 3).",
             ).model_dump(),
         )
 
@@ -94,12 +112,13 @@ async def extract_url(
         result = await enqueue_extract_job(
             url=payload.url,
             mode=payload.mode,
-            schema=payload.schema_,
+            schema=schema_payload,
             prompt=payload.prompt,
             example=payload.example,
             api_key_id=key_id,
             account_id=account_id,
             is_async=is_async,
+            request_id=get_request_id(request),
         )
     except (ConnectionError, OSError):
         return JSONResponse(

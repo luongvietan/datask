@@ -1,3 +1,6 @@
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { Tick01Icon, CancelCircleIcon } from "@hugeicons/core-free-icons";
+
 export function PricingComparisonTable() {
   const rows = [
     { feature: "Cloudflare bypass", free: true, payg: true, commit: true },
@@ -31,9 +34,9 @@ export function PricingComparisonTable() {
                   {(["free", "payg", "commit"] as const).map((tier) => (
                     <td key={tier} className="py-3 text-center">
                       {row[tier] ? (
-                        <span className="text-success-green">✓</span>
+                        <Icon icon={Tick01Icon as IconProp} size={16} className="text-success-green inline-block" />
                       ) : (
-                        <span className="text-ink-muted opacity-30">—</span>
+                        <Icon icon={CancelCircleIcon as IconProp} size={16} className="text-ink-muted opacity-30 inline-block" />
                       )}
                     </td>
                   ))}

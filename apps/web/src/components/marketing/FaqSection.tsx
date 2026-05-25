@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { clsx } from "clsx";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { Add01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 
 const FAQS = [
   {
@@ -47,10 +49,11 @@ export function FaqSection() {
                 className="w-full flex items-center justify-between gap-4 text-left"
               >
                 <span className="text-body text-ink">{faq.q}</span>
-                <span className={clsx(
-                  "text-ink-muted transition-transform shrink-0",
-                  open === i && "rotate-45"
-                )}>+</span>
+                <Icon
+                  icon={(open === i ? Cancel01Icon : Add01Icon) as IconProp}
+                  size={18}
+                  className={clsx("text-ink-muted shrink-0 transition-transform", open === i && "rotate-90")}
+                />
               </button>
               {open === i && (
                 <p className="text-body text-ink-muted mt-3 leading-relaxed">{faq.a}</p>

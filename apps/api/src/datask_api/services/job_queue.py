@@ -40,6 +40,7 @@ async def enqueue_fetch_job(
     url: str,
     account_id: str | None = None,
     api_key_id: str | None = None,
+    request_id: str | None = None,
 ) -> FetchResponse:
     """
     Enqueue Layer 1 fetch job và chờ kết quả.
@@ -53,6 +54,7 @@ async def enqueue_fetch_job(
         url,
         account_id,
         api_key_id,
+        request_id,
         job_timeout=30,
         result_ttl=120,
     )
@@ -81,6 +83,7 @@ async def enqueue_extract_job(
     api_key_id: str,
     account_id: str,
     is_async: bool = False,
+    request_id: str | None = None,
 ) -> ExtractResponse | JSONResponse:
     """
     Enqueue Layer 2/3 extract job.
@@ -98,6 +101,7 @@ async def enqueue_extract_job(
         example,
         api_key_id,
         account_id,
+        request_id,
         job_timeout=60,
         result_ttl=300,
     )
@@ -109,6 +113,7 @@ async def enqueue_extract_job(
                 "job_id": job.id,
                 "status": "queued",
                 "status_url": f"/v1/jobs/{job.id}",
+                "meta": {"request_id": request_id},
             },
         )
 

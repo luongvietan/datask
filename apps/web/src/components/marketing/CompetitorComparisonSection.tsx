@@ -1,8 +1,6 @@
 import { Fragment } from "react";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { Icon, type IconProp } from "@/components/ui/Icon";
 import { ValidationIcon, AlertCircleIcon, StarIcon, CancelCircleIcon } from "@hugeicons/core-free-icons";
-
-type IconProp = HugeiconsIconProps["icon"];
 
 const COMPETITORS = ["Firecrawl", "Jina Reader", "Apify", "ScrapingBee", "Datask"];
 
@@ -130,7 +128,7 @@ function Cell({ value, note, isDatask }: { value: CellValue; note?: string; isDa
     return (
       <td className={`py-3 text-center align-middle ${isDatask ? "bg-accent-blue/5" : ""}`}>
         <span className="inline-flex justify-center">
-          <HugeiconsIcon icon={ValidationIcon as IconProp} size={16} strokeWidth={1.5} className="text-success-green" />
+          <Icon icon={ValidationIcon as IconProp} size={16} className="text-success-green" />
         </span>
       </td>
     );
@@ -139,7 +137,7 @@ function Cell({ value, note, isDatask }: { value: CellValue; note?: string; isDa
     return (
       <td className={`py-3 text-center align-middle ${isDatask ? "bg-accent-blue/5" : ""}`}>
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-blue/15 text-accent-blue text-[11px] font-medium whitespace-nowrap">
-          <HugeiconsIcon icon={StarIcon as IconProp} size={11} strokeWidth={1.5} className="shrink-0" />
+          <Icon icon={StarIcon as IconProp} size={11} className="shrink-0" />
           Only one
         </span>
       </td>
@@ -149,7 +147,7 @@ function Cell({ value, note, isDatask }: { value: CellValue; note?: string; isDa
     return (
       <td className={`py-3 text-center align-middle ${isDatask ? "bg-accent-blue/5" : ""}`}>
         <span className="inline-flex justify-center">
-          <HugeiconsIcon icon={AlertCircleIcon as IconProp} size={16} strokeWidth={1.5} className="text-[#F59E0B]" />
+          <Icon icon={AlertCircleIcon as IconProp} size={16} className="text-[#F59E0B]" />
         </span>
         {note && (
           <p className="text-[10px] text-ink-muted mt-0.5 leading-tight">{note}</p>
@@ -161,7 +159,7 @@ function Cell({ value, note, isDatask }: { value: CellValue; note?: string; isDa
     return (
       <td className={`py-3 text-center align-middle ${isDatask ? "bg-accent-blue/5" : ""}`}>
         <span className="inline-flex justify-center opacity-25">
-          <HugeiconsIcon icon={CancelCircleIcon as IconProp} size={16} strokeWidth={1.5} className="text-ink-muted" />
+          <Icon icon={CancelCircleIcon as IconProp} size={16} className="text-ink-muted" />
         </span>
       </td>
     );

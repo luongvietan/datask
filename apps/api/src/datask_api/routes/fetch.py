@@ -8,6 +8,7 @@ from datask_core.models import ErrorCode, ErrorResponse, FetchResponse
 from fastapi import APIRouter, Header, Query, Request
 from fastapi.responses import JSONResponse
 
+from datask_api.middleware.request_context import get_request_id
 from datask_api.services.job_queue import enqueue_fetch_job
 from datask_api.services.rate_limiter import check_ip_rate_limit
 
@@ -75,7 +76,12 @@ async def fetch_url(
                 pass
 
     try:
-        result = await enqueue_fetch_job(url=url, account_id=account_id, api_key_id=api_key_id)
+        result = await enqueue_fetch_job(
+            url=url,
+            account_id=account_id,
+            api_key_id=api_key_id,
+            request_id=get_request_id(request),
+        )
         return result
     except (ConnectionError, OSError) as exc:
         return JSONResponse(

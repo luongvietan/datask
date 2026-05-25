@@ -13,6 +13,14 @@ def test_extract_request_schema_mode():
     assert req.schema_ == {"price": "number"}
 
 
+def test_extract_request_extended_schema_preserved_raw():
+    req = ExtractRequest(
+        url="https://example.com",
+        schema_={"price": {"type": "number", "required": True, "minimum": 0}},
+    )
+    assert req.schema_ == {"price": {"type": "number", "required": True, "minimum": 0}}
+
+
 def test_extract_request_prompt_mode():
     req = ExtractRequest(
         url="https://example.com",

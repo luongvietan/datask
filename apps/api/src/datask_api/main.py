@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from datask_api.middleware.request_context import RequestContextMiddleware
 from datask_api.routes import auth, billing, extract, fetch, health, jobs, keys, webhooks
 
 logger = structlog.get_logger()
@@ -52,8 +53,9 @@ def create_app() -> FastAPI:
         allow_origins=allow_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "DELETE"],
-        allow_headers=["Authorization", "Content-Type", "X-Datask-Async"],
+        allow_headers=["Authorization", "Content-Type", "X-Datask-Async", "X-Request-Id"],
     )
+    app.add_middleware(RequestContextMiddleware)
 
     app.include_router(health.router, tags=["System"])
     app.include_router(fetch.router, prefix="/v1", tags=["Layer 1 — Fetch"])

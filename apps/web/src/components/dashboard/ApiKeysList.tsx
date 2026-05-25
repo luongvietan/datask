@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { Copy01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
 import { useApiKeys, useRevokeKey } from "@/hooks/useApiKeys";
 import { useSessionKey } from "@/hooks/useSessionKey";
 
@@ -75,11 +77,9 @@ export function ApiKeysList() {
                 title="Copy prefix"
               >
                 {copiedId === key.id ? (
-                  <span className="text-green-400 text-micro">Copied!</span>
+                  <Icon icon={Tick01Icon as IconProp} size={14} className="text-success-green" />
                 ) : (
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
+                  <Icon icon={Copy01Icon as IconProp} size={14} />
                 )}
               </button>
             </div>

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { Add01Icon, Alert01Icon, Delete01Icon } from "@hugeicons/core-free-icons";
 import { useSessionKey } from "@/hooks/useSessionKey";
 
 interface WebhookEndpoint {
@@ -83,14 +85,18 @@ export default function WebhooksPage() {
           </p>
         </div>
         <Button variant="primary" onClick={() => setShowForm(true)} disabled={!sessionKey}>
-          + Add endpoint
+          <span className="inline-flex items-center gap-1.5">
+            <Icon icon={Add01Icon as IconProp} size={14} />
+            Add endpoint
+          </span>
         </Button>
       </div>
 
       {newSecret && (
         <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 space-y-3">
-          <p className="text-body-sm text-yellow-400 font-medium">
-            ⚠ Save your webhook secret — it will not be shown again.
+          <p className="text-body-sm text-yellow-400 font-medium flex items-center gap-2">
+            <Icon icon={Alert01Icon as IconProp} size={16} className="shrink-0" />
+            Save your webhook secret — it will not be shown again.
           </p>
           <div className="flex items-center gap-2">
             <code className="flex-1 text-caption font-mono bg-surface-1 rounded-lg px-3 py-2 break-all text-ink">
@@ -179,7 +185,10 @@ export default function WebhooksPage() {
                   }
                 }}
               >
-                Delete
+                <span className="inline-flex items-center gap-1.5">
+                  <Icon icon={Delete01Icon as IconProp} size={14} />
+                  Delete
+                </span>
               </Button>
             </Card>
           ))}

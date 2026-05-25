@@ -2,6 +2,15 @@
 
 import { useState, type FormEvent } from "react";
 import { clsx } from "clsx";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import {
+  GlobeIcon,
+  CodeIcon,
+  SparklesIcon,
+  PlayIcon,
+  ValidationIcon,
+  CancelCircleIcon,
+} from "@hugeicons/core-free-icons";
 import { useSessionKey } from "@/hooks/useSessionKey";
 
 type Layer = "fetch" | "schema" | "prompt";
@@ -13,21 +22,24 @@ interface RunResult {
   elapsed: number;
 }
 
-const LAYER_META: Record<Layer, { label: string; badge: string; desc: string }> = {
+const LAYER_META: Record<Layer, { label: string; badge: string; desc: string; icon: IconProp }> = {
   fetch: {
     label: "Layer 1 — Fetch",
     badge: "Free",
     desc: "Returns clean Markdown. No schema, no prompt needed.",
+    icon: GlobeIcon as IconProp,
   },
   schema: {
     label: "Layer 2 — Schema",
     badge: "1 credit",
     desc: 'Define exactly which fields to extract as a JSON schema, e.g. {"price": "number", "title": "string"}.',
+    icon: CodeIcon as IconProp,
   },
   prompt: {
     label: "Layer 3 — NL Prompt",
     badge: "2 credits",
     desc: "Describe what you want in plain English, e.g. \"Get the product title, price, and whether it is in stock.\"",
+    icon: SparklesIcon as IconProp,
   },
 };
 
@@ -114,10 +126,11 @@ export function PlaygroundClient() {
             key={l}
             onClick={() => { setLayer(l); setResult(null); }}
             className={clsx(
-              "px-4 py-2 rounded-lg text-caption font-medium transition-colors whitespace-nowrap",
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-caption font-medium transition-colors whitespace-nowrap",
               layer === l ? "bg-surface-2 text-ink" : "text-ink-muted hover:text-ink"
             )}
           >
+            <Icon icon={LAYER_META[l].icon} size={14} className="shrink-0" />
             {LAYER_META[l].label}
           </button>
         ))}
@@ -187,7 +200,10 @@ export function PlaygroundClient() {
               Running…
             </>
           ) : (
-            "Run →"
+            <>
+              <Icon icon={PlayIcon as IconProp} size={14} />
+              Run
+            </>
           )}
         </button>
 
@@ -207,10 +223,11 @@ export function PlaygroundClient() {
             result.ok ? "bg-success-green/5" : "bg-red-500/5"
           )}>
             <div className="flex items-center gap-2">
-              <span className={clsx(
-                "size-2 rounded-full shrink-0",
-                result.ok ? "bg-success-green" : "bg-red-500"
-              )} />
+              <Icon
+                icon={(result.ok ? ValidationIcon : CancelCircleIcon) as IconProp}
+                size={16}
+                className={result.ok ? "text-success-green shrink-0" : "text-red-400 shrink-0"}
+              />
               <span className={clsx("text-caption font-medium", result.ok ? "text-success-green" : "text-red-400")}>
                 {result.ok ? "Success" : "Failed"}
                 {result.status > 0 && ` · HTTP ${result.status}`}

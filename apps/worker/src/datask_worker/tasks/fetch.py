@@ -119,11 +119,11 @@ def _set_cache(url: str, content: str, ttl: int = 60) -> None:
     wait=wait_exponential(multiplier=1, min=1, max=8),
     reraise=True,
 )
-def _scrape_with_scrapling(url: str) -> str:
+def _scrape_with_scrapling(url: str) -> tuple[str, str]:
     """
     Strategy router: try AsyncFetcher (fast, <2s) first.
     If Cloudflare challenge detected → fallback to StealthyFetcher.
-    Returns raw HTML.
+    Returns (raw HTML, fetch_strategy).
     """
     from scrapling.fetchers import AsyncFetcher, StealthyFetcher  # type: ignore[import]
 
@@ -144,13 +144,13 @@ def _scrape_with_scrapling(url: str) -> str:
         if any(ind in html.lower() for ind in cf_indicators) or page.status_code in (403, 503):
             raise ValueError("Cloudflare challenge detected, falling back to StealthyFetcher")
 
-        return html
+        return html, "async"
     except Exception as e:
         logger.info("async_fetcher_fallback", url=url, reason=str(e)[:100])
 
     fetcher_stealthy = StealthyFetcher(proxy=proxy_url if proxy_url else None)
     page = fetcher_stealthy.fetch(url)
-    return page.html_content
+    return page.html_content, "stealth"
 
 
 def _html_to_markdown(html: str) -> str:
@@ -178,43 +178,90 @@ def _html_to_markdown(html: str) -> str:
         return stripper.get_text()
 
 
+def _build_meta(
+    request_id: str,
+    layer: int,
+    latency_ms: int,
+    *,
+    model: str | None = None,
+    fetch_strategy: str | None = None,
+    cache_hit: bool = False,
+) -> dict:
+    return {
+        "request_id": request_id,
+        "layer": layer,
+        "latency_ms": latency_ms,
+        "model": model,
+        "fetch_strategy": fetch_strategy,
+        "cache_hit": cache_hit,
+    }
+
+
 def run_fetch(
     url: str,
     account_id: str | None = None,
     api_key_id: str | None = None,
+    request_id: str | None = None,
 ) -> dict:
     """
     RQ task entry point.
     account_id/api_key_id used for usage tracking when present.
     Returns dict matching FetchResponse schema.
     """
-    log = logger.bind(url=url)
+    log = logger.bind(url=url, request_id=request_id)
     start_ms = int(time.time() * 1000)
 
     if not _is_safe_url(url):
         raise ValueError(f"URL blocked for security reasons: {url}")
 
+    if not request_id:
+        raise ValueError("request_id is required for worker fetch tasks")
+
     cached = _try_get_cache(url)
     if cached:
         log.info("fetch_cache_hit")
+        response_time_ms = int(time.time() * 1000) - start_ms
+        if account_id:
+            from datask_worker.usage_tracker import record_usage
+
+            record_usage(
+                account_id=account_id,
+                api_key_id=api_key_id,
+                url=url,
+                layer=1,
+                success=True,
+                credits_used=1,
+                response_time_ms=response_time_ms,
+                request_id=request_id,
+                fetch_strategy="cache",
+                cache_hit=True,
+            )
         return {
             "content": cached,
             "content_type": ContentType.MARKDOWN,
             "fetched_at": datetime.now(UTC).isoformat(),
             "url": url,
+            "meta": _build_meta(
+                request_id=request_id,
+                layer=1,
+                latency_ms=response_time_ms,
+                fetch_strategy="cache",
+                cache_hit=True,
+            ),
         }
 
     log.info("fetch_start")
     success = False
     error_code = None
     markdown = ""
+    fetch_strategy = "async"
 
     try:
-        html = _scrape_with_scrapling(url)
+        html, fetch_strategy = _scrape_with_scrapling(url)
         markdown = _html_to_markdown(html)
         success = True
         _set_cache(url, markdown, ttl=60)
-        log.info("fetch_complete", markdown_length=len(markdown))
+        log.info("fetch_complete", markdown_length=len(markdown), fetch_strategy=fetch_strategy)
     except Exception as e:
         error_code = "fetch_failed"
         log.error("fetch_error", error=str(e))
@@ -224,6 +271,7 @@ def run_fetch(
 
     if account_id:
         from datask_worker.usage_tracker import record_usage
+
         record_usage(
             account_id=account_id,
             api_key_id=api_key_id,
@@ -233,6 +281,9 @@ def run_fetch(
             credits_used=1,
             response_time_ms=response_time_ms,
             error_code=error_code,
+            request_id=request_id,
+            fetch_strategy=fetch_strategy,
+            cache_hit=False,
         )
 
     return {
@@ -240,4 +291,11 @@ def run_fetch(
         "content_type": ContentType.MARKDOWN,
         "fetched_at": datetime.now(UTC).isoformat(),
         "url": url,
+        "meta": _build_meta(
+            request_id=request_id,
+            layer=1,
+            latency_ms=response_time_ms,
+            fetch_strategy=fetch_strategy,
+            cache_hit=False,
+        ),
     }

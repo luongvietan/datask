@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/Button";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { Icon, type IconProp } from "@/components/ui/Icon";
 import { CreditCardIcon, BookOpenTextIcon, LayoutGridIcon } from "@hugeicons/core-free-icons";
 import { MobileMenu } from "./MobileMenu";
-
-type IconProp = HugeiconsIconProps["icon"];
 
 const NAV_LINKS: { href: string; label: string; icon: IconProp }[] = [
   { href: "/pricing", label: "Pricing", icon: CreditCardIcon as IconProp },
@@ -19,12 +17,10 @@ export async function TopNav() {
   return (
     <header className="sticky top-0 z-50 bg-canvas border-b border-hairline-soft">
       <div className="container-app h-14 flex items-center justify-between gap-6">
-        {/* Wordmark */}
         <Link href="/" className="text-[22px] font-medium tracking-[-0.8px] text-ink shrink-0">
           Datask
         </Link>
 
-        {/* Center nav */}
         <nav className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map((link) => (
             <Link
@@ -32,13 +28,12 @@ export async function TopNav() {
               href={link.href}
               className="flex items-center gap-1.5 text-caption text-ink-muted hover:text-ink transition-colors"
             >
-              <HugeiconsIcon icon={link.icon} size={13} strokeWidth={1.5} className="shrink-0" />
+              <Icon icon={link.icon} size={13} className="shrink-0" />
               {link.label}
             </Link>
           ))}
         </nav>
 
-        {/* Right CTAs */}
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
@@ -50,7 +45,7 @@ export async function TopNav() {
               <Link href="/dashboard" className="hidden sm:block">
                 <Button variant="primary" size="sm">
                   <span className="flex items-center gap-1.5">
-                    <HugeiconsIcon icon={LayoutGridIcon as IconProp} size={13} strokeWidth={1.5} className="shrink-0" />
+                    <Icon icon={LayoutGridIcon as IconProp} size={13} className="shrink-0" />
                     Dashboard
                   </span>
                 </Button>
@@ -64,7 +59,6 @@ export async function TopNav() {
               <Link href="/register" className="hidden sm:block">
                 <Button variant="primary" size="sm">Get started</Button>
               </Link>
-              {/* Mobile primary pill */}
               <Link href="/register" className="sm:hidden">
                 <Button variant="primary" size="sm">Get started</Button>
               </Link>

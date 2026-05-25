@@ -1,4 +1,11 @@
 import { Card } from "@/components/ui/Card";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import {
+  Shield01Icon,
+  SparklesIcon,
+  RepairIcon,
+  Coins01Icon,
+} from "@hugeicons/core-free-icons";
 
 const FEATURES = [
   {
@@ -9,6 +16,7 @@ const FEATURES = [
       "Scrapling engine solves all Turnstile challenge types — TLS fingerprint spoofing, browser fingerprint impersonation. >95% success rate vs ~40% for Firecrawl.",
     stat: ">95%",
     statLabel: "success rate on CF-protected sites",
+    icon: Shield01Icon as IconProp,
   },
   {
     variant: "default" as const,
@@ -18,6 +26,7 @@ const FEATURES = [
       'Send a URL and a prompt: "Get me the price and title." Get back structured JSON. No CSS selectors. No XPath. No schema files.',
     stat: "1 request",
     statLabel: "URL + prompt → JSON",
+    icon: SparklesIcon as IconProp,
   },
   {
     variant: "magenta" as const,
@@ -27,6 +36,7 @@ const FEATURES = [
       "Scrapling's adaptive element tracking learns when websites change layout. Scraper maintenance cost = $0. Coming as a contractual SLA in Phase 3.",
     stat: "$0",
     statLabel: "scraper maintenance cost",
+    icon: RepairIcon as IconProp,
   },
   {
     variant: "default" as const,
@@ -36,6 +46,7 @@ const FEATURES = [
       "Free tier 500 req/month. PAYG $0.005/req. Commit 10K/month at $0.003/req. Cheaper per successful request than every competitor.",
     stat: "$0.005",
     statLabel: "per request — no fixed monthly seat",
+    icon: Coins01Icon as IconProp,
   },
 ];
 
@@ -51,7 +62,10 @@ export function FeaturesSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {FEATURES.map((f) => (
             <Card key={f.title} variant={f.variant} className="flex flex-col gap-4">
-              <p className="text-caption text-ink-muted uppercase tracking-widest">{f.eyebrow}</p>
+              <div className="flex items-center gap-2">
+                <Icon icon={f.icon} size={18} className="text-accent-blue shrink-0" />
+                <p className="text-caption text-ink-muted uppercase tracking-widest">{f.eyebrow}</p>
+              </div>
               <h3 className="text-display-md text-ink">{f.title}</h3>
               <p className="text-body text-ink-muted leading-relaxed flex-1">{f.body}</p>
               <div className="pt-4 border-t border-hairline-soft">

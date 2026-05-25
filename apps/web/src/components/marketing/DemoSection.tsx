@@ -2,10 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { clsx } from "clsx";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
-import { GlobeIcon, CodeIcon, SparklesIcon } from "@hugeicons/core-free-icons";
-
-type IconProp = HugeiconsIconProps["icon"];
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { GlobeIcon, CodeIcon, SparklesIcon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 const LAYERS: {
   id: string;
@@ -131,7 +129,7 @@ export function DemoSection() {
                   : "text-ink-muted hover:text-ink"
               )}
             >
-              <HugeiconsIcon icon={l.icon} size={13} strokeWidth={1.5} className="shrink-0" />
+              <Icon icon={l.icon} size={13} className="shrink-0" />
               {l.label}
             </button>
           ))}
@@ -160,9 +158,10 @@ export function DemoSection() {
               <button
                 type="submit"
                 disabled={!url.trim()}
-                className="btn-primary text-[13px] px-4 py-2 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="btn-primary text-[13px] px-4 py-2 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
               >
-                Fetch →
+                Fetch
+                <Icon icon={ArrowRight01Icon as IconProp} size={14} />
               </button>
             </div>
             <p className="text-[11px] text-ink-muted mt-2 pl-1">
@@ -178,10 +177,11 @@ export function DemoSection() {
             </div>
             <a
               href="/register"
-              className="btn-primary text-[13px] px-4 py-2 shrink-0"
+              className="btn-primary text-[13px] px-4 py-2 shrink-0 inline-flex items-center gap-1.5"
               onClick={(e) => e.stopPropagation()}
             >
-              Get API key →
+              Get API key
+              <Icon icon={ArrowRight01Icon as IconProp} size={14} />
             </a>
           </div>
         )}

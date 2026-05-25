@@ -2,13 +2,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
+from datask_core.request_id import is_valid_request_id
 from pydantic import BaseModel, Field, field_validator, model_validator
-
-# ---------------------------------------------------------------------------
-# Enums
-# ---------------------------------------------------------------------------
 
 
 class ContentType(StrEnum):
@@ -45,12 +42,65 @@ class ErrorCode(StrEnum):
 # ---------------------------------------------------------------------------
 
 
+class FieldSchema(BaseModel):
+    """Extended schema definition for a single extracted field (Layer 2)."""
+
+    type: Literal["string", "number", "integer", "boolean"] = Field(
+        ...,
+        description="Expected value type for this field",
+    )
+    required: bool = Field(
+        default=False,
+        description="Whether the field must be present in extracted output",
+    )
+    minimum: float | None = Field(
+        default=None,
+        description="Minimum numeric value (number/integer fields only)",
+    )
+    maximum: float | None = Field(
+        default=None,
+        description="Maximum numeric value (number/integer fields only)",
+    )
+    maxLength: int | None = Field(
+        default=None,
+        description="Maximum string length (string fields only)",
+    )
+    selector: str | None = Field(
+        default=None,
+        description="Optional CSS selector hint for direct DOM extraction",
+    )
+
+    model_config = {"populate_by_name": True}
+
+
 class ExtractRequest(BaseModel):
     url: str = Field(..., description="URL to scrape")
     schema_: dict[str, Any] | None = Field(
         default=None,
         alias="schema",
-        description="JSON schema for structured extraction (Layer 2)",
+        description=(
+            "JSON schema for structured extraction (Layer 2). "
+            "Shorthand: {\"price\": \"number\"}. "
+            "Extended field object (FieldSchema): type, required, minimum, maximum, "
+            "maxLength, selector."
+        ),
+        json_schema_extra={
+            "examples": [
+                {"price": "number", "title": "string"},
+                {
+                    "price": {
+                        "type": "number",
+                        "required": True,
+                        "minimum": 0,
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200,
+                        "selector": "h1",
+                    },
+                },
+            ]
+        },
     )
     prompt: str | None = Field(
         default=None,
@@ -90,11 +140,32 @@ class ExtractRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+class RequestMeta(BaseModel):
+    """Provenance metadata attached to every fetch/extract response."""
+
+    request_id: str = Field(..., description="Unique trace ID, format req_{ulid}")
+    layer: int | None = Field(default=None, description="API layer: 1=fetch, 2=schema, 3=prompt")
+    latency_ms: int | None = Field(default=None, description="End-to-end processing time in ms")
+    model: str | None = Field(default=None, description="LLM model used (Layer 3 only)")
+    fetch_strategy: str | None = Field(
+        default=None, description="Fetch strategy: async, stealth, or cache"
+    )
+    cache_hit: bool = Field(default=False, description="Whether content was served from cache")
+
+    @field_validator("request_id")
+    @classmethod
+    def validate_request_id_format(cls, v: str) -> str:
+        if not is_valid_request_id(v):
+            raise ValueError("request_id must match req_{ulid} format")
+        return v
+
+
 class FetchResponse(BaseModel):
     content: str
     content_type: ContentType = ContentType.MARKDOWN
     fetched_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     url: str
+    meta: RequestMeta
 
 
 class ExtractResponse(BaseModel):
@@ -104,6 +175,7 @@ class ExtractResponse(BaseModel):
     url: str
     fetched_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     credits_used: int = 1
+    meta: RequestMeta
 
 
 class ErrorResponse(BaseModel):

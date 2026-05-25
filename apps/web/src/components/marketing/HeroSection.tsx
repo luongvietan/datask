@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { Icon, type IconProp } from "@/components/ui/Icon";
 import {
   AlertCircleIcon,
   CheckListIcon,
   SparklesIcon,
   ArrowUpRightStackIcon,
+  ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
-
-type IconProp = HugeiconsIconProps["icon"];
 
 export function HeroSection() {
   return (
@@ -21,7 +20,7 @@ export function HeroSection() {
             Now in public beta
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-surface-1 text-caption text-ink-muted border border-hairline">
-            <HugeiconsIcon icon={AlertCircleIcon as IconProp} size={13} strokeWidth={1.5} className="text-[#F59E0B] shrink-0" />
+            <Icon icon={AlertCircleIcon as IconProp} size={13} className="text-[#F59E0B] shrink-0" />
             Firecrawl fails on Turnstile. We don&apos;t.
           </span>
         </div>
@@ -42,7 +41,12 @@ export function HeroSection() {
         {/* CTAs */}
         <div className="flex items-center gap-3 flex-wrap mb-10">
           <Link href="/register">
-            <Button variant="primary" size="lg">Get started free →</Button>
+            <Button variant="primary" size="lg">
+              <span className="inline-flex items-center gap-2">
+                Get started free
+                <Icon icon={ArrowRight01Icon as IconProp} size={16} />
+              </span>
+            </Button>
           </Link>
           <Link href="/docs">
             <Button variant="secondary" size="lg">Read the docs</Button>
@@ -58,7 +62,7 @@ export function HeroSection() {
             { stat: "500 req", label: "free tier, no credit card", icon: CheckListIcon as IconProp },
           ].map(({ stat, label, icon }) => (
             <div key={stat} className="flex items-start gap-2.5">
-              <HugeiconsIcon icon={icon} size={18} strokeWidth={1.5} className="text-accent-blue shrink-0 mt-0.5" />
+              <Icon icon={icon} size={18} className="text-accent-blue shrink-0 mt-0.5" />
               <div>
                 <p className="text-display-md text-ink leading-none">{stat}</p>
                 <p className="text-caption text-ink-muted mt-1 max-w-[140px] leading-snug">{label}</p>

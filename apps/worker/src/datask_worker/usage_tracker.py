@@ -3,12 +3,26 @@
 Usage tracking helper cho worker.
 Ghi UsageRecord vào PostgreSQL sau mỗi job.
 """
+from __future__ import annotations
+
 import structlog
-from datetime import UTC, datetime
+from urllib.parse import urlparse
+
+from sqlalchemy.exc import IntegrityError
 
 from datask_worker.db import get_session
 
 logger = structlog.get_logger()
+
+
+def _extract_domain(url: str) -> str | None:
+    try:
+        netloc = urlparse(url).netloc or None
+        if netloc and len(netloc) > 256:
+            return netloc[:256]
+        return netloc
+    except Exception:
+        return None
 
 
 def record_usage(
@@ -20,13 +34,18 @@ def record_usage(
     credits_used: int = 1,
     response_time_ms: int | None = None,
     error_code: str | None = None,
+    request_id: str | None = None,
+    validation_valid: bool | None = None,
+    model: str | None = None,
+    fetch_strategy: str | None = None,
+    cache_hit: bool = False,
+    metadata: dict | None = None,
 ) -> None:
     """
     Ghi usage record. Fire-and-forget — lỗi không làm fail job.
     account_id=None cho Layer 1 anonymous requests.
     """
     if account_id is None:
-        # Layer 1 anonymous — bỏ qua (không track)
         return
 
     try:
@@ -42,6 +61,13 @@ def record_usage(
                 credits_used=credits_used,
                 response_time_ms=response_time_ms,
                 error_code=error_code,
+                request_id=request_id,
+                domain=_extract_domain(url),
+                validation_valid=validation_valid,
+                model=model,
+                fetch_strategy=fetch_strategy,
+                cache_hit=cache_hit,
+                metadata_=metadata,
             )
             session.add(record)
 
@@ -51,7 +77,13 @@ def record_usage(
             layer=layer,
             success=success,
             credits_used=credits_used,
+            request_id=request_id,
+        )
+    except IntegrityError:
+        logger.warning(
+            "usage_record_duplicate",
+            account_id=account_id,
+            request_id=request_id,
         )
     except Exception as e:
-        # Không raise — usage tracking failure không nên fail job
-        logger.error("usage_record_failed", error=str(e), account_id=account_id)
+        logger.error("usage_record_failed", error=str(e), account_id=account_id, request_id=request_id)

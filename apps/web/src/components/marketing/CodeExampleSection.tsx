@@ -2,10 +2,8 @@
 
 import { useState } from "react";
 import { clsx } from "clsx";
-import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
+import { Icon, type IconProp } from "@/components/ui/Icon";
 import { AlertCircleIcon, ValidationIcon } from "@hugeicons/core-free-icons";
-
-type IconProp = HugeiconsIconProps["icon"];
 
 const TABS = [
   {
@@ -123,7 +121,7 @@ export function CodeExampleSection() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="code-block border border-[#F59E0B]/20">
               <p className="text-caption text-[#F59E0B] mb-4 uppercase tracking-widest flex items-center gap-2">
-                <HugeiconsIcon icon={AlertCircleIcon as IconProp} size={14} strokeWidth={1.5} className="shrink-0" />
+                <Icon icon={AlertCircleIcon as IconProp} size={14} className="shrink-0" />
                 Firecrawl
               </p>
               <pre className="text-[13px] font-mono text-ink-muted leading-relaxed whitespace-pre overflow-x-auto">
@@ -132,7 +130,7 @@ export function CodeExampleSection() {
             </div>
             <div className="code-block border border-success-green/20">
               <p className="text-caption text-success-green mb-4 uppercase tracking-widest flex items-center gap-2">
-                <HugeiconsIcon icon={ValidationIcon as IconProp} size={14} strokeWidth={1.5} className="shrink-0" />
+                <Icon icon={ValidationIcon as IconProp} size={14} className="shrink-0" />
                 Datask
               </p>
               <pre className="text-[13px] font-mono text-ink leading-relaxed whitespace-pre overflow-x-auto">

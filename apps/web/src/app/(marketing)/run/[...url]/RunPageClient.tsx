@@ -2,6 +2,15 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import {
+  ArrowRight01Icon,
+  Copy01Icon,
+  Tick01Icon,
+  ValidationIcon,
+  CancelCircleIcon,
+  Loading03Icon,
+} from "@hugeicons/core-free-icons";
 
 interface Props {
   targetUrl: string;
@@ -116,16 +125,17 @@ export function RunPageClient({ targetUrl }: Props) {
           <button
             type="submit"
             disabled={!nextUrl.trim()}
-            className="btn-primary text-[13px] px-4 py-2 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="btn-primary text-[13px] px-4 py-2 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
           >
-            Fetch →
+            Fetch
+            <Icon icon={ArrowRight01Icon as IconProp} size={14} />
           </button>
         </form>
 
         {/* Loading state */}
         {loading && (
           <div className="flex items-center gap-3 py-4">
-            <span className="size-2 rounded-full bg-accent-blue animate-pulse shrink-0" />
+            <Icon icon={Loading03Icon as IconProp} size={16} className="text-accent-blue animate-spin shrink-0" />
             <span className="text-caption text-ink-muted">
               Fetching <span className="font-mono text-ink">{targetUrl}</span> — bypassing anti-bot…
             </span>
@@ -135,7 +145,10 @@ export function RunPageClient({ targetUrl }: Props) {
         {/* Error state */}
         {!loading && error && (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 space-y-3">
-            <p className="text-body-sm text-red-400 font-medium">Fetch failed</p>
+            <p className="text-body-sm text-red-400 font-medium flex items-center gap-2">
+              <Icon icon={CancelCircleIcon as IconProp} size={16} />
+              Fetch failed
+            </p>
             <p className="text-caption text-ink-muted font-mono">{error}</p>
             <p className="text-caption text-ink-muted">
               The API may not be running, or this site is blocking requests.{" "}
@@ -150,7 +163,7 @@ export function RunPageClient({ targetUrl }: Props) {
         {!loading && result && (
           <>
             <div className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-success-green shrink-0" />
+              <Icon icon={ValidationIcon as IconProp} size={16} className="text-success-green shrink-0" />
               <span className="text-caption text-success-green">
                 Successfully fetched — Cloudflare bypass active
               </span>
@@ -160,7 +173,19 @@ export function RunPageClient({ targetUrl }: Props) {
               <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
                 <span className="text-caption text-ink-muted">Content (Markdown)</span>
                 <Button variant="ghost" size="sm" onClick={copyContent}>
-                  {copied ? "Copied!" : "Copy"}
+                  <span className="inline-flex items-center gap-1.5">
+                    {copied ? (
+                      <>
+                        <Icon icon={Tick01Icon as IconProp} size={14} className="text-success-green" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Icon icon={Copy01Icon as IconProp} size={14} />
+                        Copy
+                      </>
+                    )}
+                  </span>
                 </Button>
               </div>
               <pre className="p-4 text-caption text-ink font-mono overflow-auto max-h-[500px] whitespace-pre-wrap">

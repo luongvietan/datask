@@ -117,3 +117,29 @@ async def test_usage_insert_and_count(db_session: AsyncSession) -> None:
     assert summary["current_month_requests"] == 4
     assert summary["successful_requests"] == 3
     assert summary["failed_requests"] == 1
+
+
+@pytest.mark.asyncio
+async def test_usage_insert_with_request_id(db_session: AsyncSession) -> None:
+    account = await accounts_repo.create(db_session, email="reqid@example.com")
+    await db_session.commit()
+
+    record = await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://shop.example.com/product/1",
+        layer=2,
+        success=True,
+        request_id="req_01JABCDEFGHJKMNPQRSTVWXYZ0",
+        domain="shop.example.com",
+        fetch_strategy="async",
+        cache_hit=False,
+        response_time_ms=1200,
+    )
+    await db_session.commit()
+
+    assert record.request_id == "req_01JABCDEFGHJKMNPQRSTVWXYZ0"
+    assert record.domain == "shop.example.com"
+    assert record.fetch_strategy == "async"
+    assert record.response_time_ms == 1200

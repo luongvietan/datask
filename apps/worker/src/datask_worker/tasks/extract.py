@@ -44,6 +44,14 @@ def _coerce_value(value: Any, type_hint: str) -> Any:
         return value
 
 
+def _field_type_hint(hint: Any) -> str:
+    if isinstance(hint, str):
+        return hint
+    if isinstance(hint, dict):
+        return str(hint.get("type", "string"))
+    return "string"
+
+
 def _extract_with_schema(
     content: str,
     html: str,
@@ -95,7 +103,7 @@ def _extract_with_schema(
             )
             for field in plain_fields:
                 if field in llm_result:
-                    type_hint = plain_fields[field] if isinstance(plain_fields[field], str) else "string"
+                    type_hint = _field_type_hint(plain_fields[field])
                     result[field] = _coerce_value(llm_result[field], type_hint)
                     confidence[field] = "medium"
                 else:
@@ -201,10 +209,14 @@ def run_extract(
     example: dict[str, Any] | None,
     api_key_id: str,
     account_id: str,
+    request_id: str | None = None,
 ) -> dict:
-    log = logger.bind(url=url, mode=mode, api_key_id=api_key_id)
+    log = logger.bind(url=url, mode=mode, api_key_id=api_key_id, request_id=request_id)
     log.info("extract_start")
     start_ms = int(time.time() * 1000)
+
+    if not request_id:
+        raise ValueError("request_id is required for worker extract tasks")
 
     success = False
     error_code = None
@@ -213,9 +225,12 @@ def run_extract(
     confidence: dict[str, Any] | None = None
     layer = 2 if mode == ExtractionMode.SCHEMA else 3
     credits_used = 1 if mode == ExtractionMode.SCHEMA else 2
+    settings = get_settings()
+    model_name = settings.openai_model if mode == ExtractionMode.PROMPT else None
+    fetch_result: dict[str, Any] = {}
 
     try:
-        fetch_result = run_fetch(url)
+        fetch_result = run_fetch(url, request_id=request_id)
         content: str = fetch_result["content"]
 
         if mode == ExtractionMode.SCHEMA:
@@ -242,6 +257,7 @@ def run_extract(
         response_time_ms = int(time.time() * 1000) - start_ms
         try:
             from datask_worker.usage_tracker import record_usage
+
             record_usage(
                 account_id=account_id,
                 api_key_id=api_key_id,
@@ -251,6 +267,8 @@ def run_extract(
                 credits_used=credits_used,
                 response_time_ms=response_time_ms,
                 error_code=error_code,
+                request_id=request_id,
+                model=model_name,
             )
         except Exception:
             pass
@@ -261,8 +279,16 @@ def run_extract(
         "data": data,
         "inferred_schema": inferred_schema,
         "url": url,
-        "fetched_at": fetch_result["fetched_at"],
+        "fetched_at": fetch_result.get("fetched_at", datetime.now(UTC).isoformat()),
         "credits_used": credits_used,
+        "meta": {
+            "request_id": request_id,
+            "layer": layer,
+            "latency_ms": response_time_ms,
+            "model": model_name,
+            "fetch_strategy": (fetch_result.get("meta") or {}).get("fetch_strategy"),
+            "cache_hit": (fetch_result.get("meta") or {}).get("cache_hit", False),
+        },
     }
     if confidence:
         result["confidence"] = confidence

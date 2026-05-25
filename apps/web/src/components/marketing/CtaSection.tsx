@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 export function CtaSection() {
   return (
@@ -12,7 +14,12 @@ export function CtaSection() {
           No signup. Just paste a Cloudflare-protected URL.
         </p>
         <Link href="/register">
-          <Button variant="primary" size="lg">Get 500 free requests →</Button>
+          <Button variant="primary" size="lg">
+            <span className="inline-flex items-center gap-2">
+              Get 500 free requests
+              <Icon icon={ArrowRight01Icon as IconProp} size={16} />
+            </span>
+          </Button>
         </Link>
       </div>
     </section>

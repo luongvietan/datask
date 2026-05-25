@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    JSON,
     String,
     Text,
     func,
@@ -94,6 +95,13 @@ class UsageRecord(Base):
     credits_used: Mapped[int] = mapped_column(Integer, default=1)
     response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    request_id: Mapped[str | None] = mapped_column(String(32), nullable=True, unique=True)
+    domain: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    validation_valid: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    model: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    fetch_strategy: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    cache_hit: Mapped[bool] = mapped_column(Boolean, default=False)
+    metadata_: Mapped[dict | None] = mapped_column("metadata", JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     account: Mapped["Account"] = relationship(back_populates="usage_records")
@@ -102,6 +110,7 @@ class UsageRecord(Base):
     __table_args__ = (
         Index("ix_usage_account_created", "account_id", "created_at"),
         Index("ix_usage_key_created", "api_key_id", "created_at"),
+        Index("ix_usage_request_id", "request_id", unique=True),
     )
 
 

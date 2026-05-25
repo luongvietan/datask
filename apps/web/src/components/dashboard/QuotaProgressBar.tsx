@@ -2,6 +2,8 @@
 
 import { useUsage } from "@/hooks/useUsage";
 import { useSessionKey } from "@/hooks/useSessionKey";
+import { Icon, type IconProp } from "@/components/ui/Icon";
+import { Alert01Icon } from "@hugeicons/core-free-icons";
 import { UpgradeButton } from "./UpgradeButton";
 
 export function QuotaProgressBar() {
@@ -21,8 +23,9 @@ export function QuotaProgressBar() {
     <div className="bg-surface-1 rounded-xl px-5 py-4 flex items-center gap-4">
       <div className="flex-1 min-w-0">
         <div className="flex justify-between text-caption mb-2">
-          <span className={isWarning ? "text-[#FACC15]" : "text-ink-muted"}>
-            {isWarning ? "⚠ Approaching free tier limit" : "Free tier usage"}
+          <span className={isWarning ? "text-[#FACC15] flex items-center gap-1.5" : "text-ink-muted"}>
+            {isWarning && <Icon icon={Alert01Icon as IconProp} size={14} className="shrink-0" />}
+            {isWarning ? "Approaching free tier limit" : "Free tier usage"}
           </span>
           <span className="text-ink-muted">
             {used.toLocaleString()} / {total.toLocaleString()} requests

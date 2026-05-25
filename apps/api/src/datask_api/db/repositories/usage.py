@@ -19,6 +19,13 @@ async def insert_record(
     credits_used: int = 1,
     response_time_ms: int | None = None,
     error_code: str | None = None,
+    request_id: str | None = None,
+    domain: str | None = None,
+    validation_valid: bool | None = None,
+    model: str | None = None,
+    fetch_strategy: str | None = None,
+    cache_hit: bool = False,
+    metadata: dict[str, Any] | None = None,
 ) -> UsageRecord:
     record = UsageRecord(
         account_id=account_id,
@@ -29,6 +36,13 @@ async def insert_record(
         credits_used=credits_used,
         response_time_ms=response_time_ms,
         error_code=error_code,
+        request_id=request_id,
+        domain=domain,
+        validation_valid=validation_valid,
+        model=model,
+        fetch_strategy=fetch_strategy,
+        cache_hit=cache_hit,
+        metadata_=metadata,
     )
     session.add(record)
     await session.flush()
