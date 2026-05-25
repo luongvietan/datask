@@ -1,0 +1,442 @@
+{
+  "run_date": "2026-06-01",
+  "note": "Sample data — run real benchmarks with API keys for production results",
+  "datask": {
+    "success_rate": 0.9329999999999999,
+    "latency_p50_ms": 2738.1,
+    "latency_p95_ms": 3336.6,
+    "total_sites": 30,
+    "successful_sites": 28,
+    "sites": [
+      {
+        "url": "https://www.cloudflare.com/products/turnstile/",
+        "name": "Cloudflare Turnstile Product",
+        "success": true,
+        "latency_ms": 2062.35,
+        "content_length": 10514
+      },
+      {
+        "url": "https://challenges.cloudflare.com/demo",
+        "name": "CF Turnstile Demo",
+        "success": true,
+        "latency_ms": 2863.93,
+        "content_length": 16134
+      },
+      {
+        "url": "https://dash.cloudflare.com/sign-up",
+        "name": "Cloudflare Dashboard Signup",
+        "success": true,
+        "latency_ms": 961.8,
+        "content_length": 7585
+      },
+      {
+        "url": "https://www.hcaptcha.com/",
+        "name": "hCaptcha Homepage",
+        "success": true,
+        "latency_ms": 1434.37,
+        "content_length": 7059
+      },
+      {
+        "url": "https://developers.cloudflare.com/turnstile/",
+        "name": "CF Turnstile Docs",
+        "success": true,
+        "latency_ms": 2748.72,
+        "content_length": 10540
+      },
+      {
+        "url": "https://www.perplexity.ai/",
+        "name": "Perplexity AI",
+        "success": true,
+        "latency_ms": 3336.57,
+        "content_length": 16121
+      },
+      {
+        "url": "https://chat.openai.com/",
+        "name": "ChatGPT Login",
+        "success": true,
+        "latency_ms": 2727.41,
+        "content_length": 22420
+      },
+      {
+        "url": "https://www.anthropic.com/",
+        "name": "Anthropic",
+        "success": true,
+        "latency_ms": 2884.31,
+        "content_length": 14263
+      },
+      {
+        "url": "https://www.discord.com/login",
+        "name": "Discord Login",
+        "success": true,
+        "latency_ms": 2888.49,
+        "content_length": 20616
+      },
+      {
+        "url": "https://www.reddit.com/login/",
+        "name": "Reddit Login",
+        "success": true,
+        "latency_ms": 1874.13,
+        "content_length": 17427
+      },
+      {
+        "url": "https://github.com/login",
+        "name": "GitHub Login",
+        "success": true,
+        "latency_ms": 2313.23,
+        "content_length": 11883
+      },
+      {
+        "url": "https://www.shopify.com/login",
+        "name": "Shopify Login",
+        "success": true,
+        "latency_ms": 2898.7,
+        "content_length": 13161
+      },
+      {
+        "url": "https://www.canva.com/login",
+        "name": "Canva Login",
+        "success": true,
+        "latency_ms": 3162.1,
+        "content_length": 6052
+      },
+      {
+        "url": "https://www.notion.so/login",
+        "name": "Notion Login",
+        "success": true,
+        "latency_ms": 2521.02,
+        "content_length": 9674
+      },
+      {
+        "url": "https://www.figma.com/login",
+        "name": "Figma Login",
+        "success": true,
+        "latency_ms": 1702.7,
+        "content_length": 11900
+      },
+      {
+        "url": "https://vercel.com/login",
+        "name": "Vercel Login",
+        "success": true,
+        "latency_ms": 3229.69,
+        "content_length": 15502
+      },
+      {
+        "url": "https://www.netlify.com/login",
+        "name": "Netlify Login",
+        "success": true,
+        "latency_ms": 2268.5,
+        "content_length": 13777
+      },
+      {
+        "url": "https://app.clickup.com/login",
+        "name": "ClickUp Login",
+        "success": true,
+        "latency_ms": 2698.36,
+        "content_length": 24447
+      },
+      {
+        "url": "https://www.linear.app/login",
+        "name": "Linear Login",
+        "success": true,
+        "latency_ms": 938.97,
+        "content_length": 12884
+      },
+      {
+        "url": "https://arc.net/",
+        "name": "Arc Browser",
+        "success": false,
+        "latency_ms": 60000.0,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.amazon.com/dp/B0D1XD1ZV3",
+        "name": "Amazon Product Page",
+        "success": true,
+        "latency_ms": 3257.96,
+        "content_length": 19445
+      },
+      {
+        "url": "https://www.ebay.com/itm/235123456789",
+        "name": "eBay Listing",
+        "success": true,
+        "latency_ms": 1026.95,
+        "content_length": 14483
+      },
+      {
+        "url": "https://www.etsy.com/listing/1234567890",
+        "name": "Etsy Listing",
+        "success": true,
+        "latency_ms": 3090.7,
+        "content_length": 7351
+      },
+      {
+        "url": "https://www.walmart.com/ip/123456789",
+        "name": "Walmart Product",
+        "success": true,
+        "latency_ms": 3420.58,
+        "content_length": 14665
+      },
+      {
+        "url": "https://www.bestbuy.com/site/searchpage.jsp?st=laptop",
+        "name": "BestBuy Search",
+        "success": true,
+        "latency_ms": 3131.42,
+        "content_length": 6468
+      },
+      {
+        "url": "https://www.target.com/c/electronics/-/N-5xtg6",
+        "name": "Target Category",
+        "success": true,
+        "latency_ms": 1386.09,
+        "content_length": 18464
+      },
+      {
+        "url": "https://www.newegg.com/p/1TS-000D-073H5",
+        "name": "Newegg Product",
+        "success": true,
+        "latency_ms": 3007.16,
+        "content_length": 17422
+      },
+      {
+        "url": "https://www.aliexpress.com/item/1005006123456.html",
+        "name": "AliExpress Product",
+        "success": false,
+        "latency_ms": 3144.6,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.zalando.com/catalog/?catalog=women",
+        "name": "Zalando Catalog",
+        "success": true,
+        "latency_ms": 1949.85,
+        "content_length": 6607
+      },
+      {
+        "url": "https://www.lazada.co.id/catalog/?q=sepatu",
+        "name": "Lazada Search",
+        "success": true,
+        "latency_ms": 2784.17,
+        "content_length": 18793
+      }
+    ]
+  },
+  "firecrawl": {
+    "success_rate": 0.3,
+    "latency_p50_ms": 1649.9,
+    "latency_p95_ms": 2240.3,
+    "total_sites": 30,
+    "successful_sites": 9,
+    "sites": [
+      {
+        "url": "https://www.cloudflare.com/products/turnstile/",
+        "name": "Cloudflare Turnstile Product",
+        "success": false,
+        "latency_ms": 846.18,
+        "content_length": 126
+      },
+      {
+        "url": "https://challenges.cloudflare.com/demo",
+        "name": "CF Turnstile Demo",
+        "success": false,
+        "latency_ms": 2467.09,
+        "content_length": 0
+      },
+      {
+        "url": "https://dash.cloudflare.com/sign-up",
+        "name": "Cloudflare Dashboard Signup",
+        "success": false,
+        "latency_ms": 1033.56,
+        "content_length": 82
+      },
+      {
+        "url": "https://www.hcaptcha.com/",
+        "name": "hCaptcha Homepage",
+        "success": false,
+        "latency_ms": 1393.12,
+        "content_length": 335
+      },
+      {
+        "url": "https://developers.cloudflare.com/turnstile/",
+        "name": "CF Turnstile Docs",
+        "success": false,
+        "latency_ms": 60000.0,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.perplexity.ai/",
+        "name": "Perplexity AI",
+        "success": false,
+        "latency_ms": 60000.0,
+        "content_length": 0
+      },
+      {
+        "url": "https://chat.openai.com/",
+        "name": "ChatGPT Login",
+        "success": true,
+        "latency_ms": 2240.32,
+        "content_length": 1262
+      },
+      {
+        "url": "https://www.anthropic.com/",
+        "name": "Anthropic",
+        "success": false,
+        "latency_ms": 940.48,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.discord.com/login",
+        "name": "Discord Login",
+        "success": true,
+        "latency_ms": 1859.97,
+        "content_length": 9909
+      },
+      {
+        "url": "https://www.reddit.com/login/",
+        "name": "Reddit Login",
+        "success": true,
+        "latency_ms": 503.07,
+        "content_length": 3785
+      },
+      {
+        "url": "https://github.com/login",
+        "name": "GitHub Login",
+        "success": false,
+        "latency_ms": 1858.95,
+        "content_length": 289
+      },
+      {
+        "url": "https://www.shopify.com/login",
+        "name": "Shopify Login",
+        "success": false,
+        "latency_ms": 1567.8,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.canva.com/login",
+        "name": "Canva Login",
+        "success": false,
+        "latency_ms": 1129.98,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.notion.so/login",
+        "name": "Notion Login",
+        "success": false,
+        "latency_ms": 1448.56,
+        "content_length": 287
+      },
+      {
+        "url": "https://www.figma.com/login",
+        "name": "Figma Login",
+        "success": false,
+        "latency_ms": 2222.1,
+        "content_length": 205
+      },
+      {
+        "url": "https://vercel.com/login",
+        "name": "Vercel Login",
+        "success": false,
+        "latency_ms": 1349.73,
+        "content_length": 93
+      },
+      {
+        "url": "https://www.netlify.com/login",
+        "name": "Netlify Login",
+        "success": true,
+        "latency_ms": 2133.96,
+        "content_length": 5288
+      },
+      {
+        "url": "https://app.clickup.com/login",
+        "name": "ClickUp Login",
+        "success": false,
+        "latency_ms": 1925.46,
+        "content_length": 111
+      },
+      {
+        "url": "https://www.linear.app/login",
+        "name": "Linear Login",
+        "success": true,
+        "latency_ms": 1519.28,
+        "content_length": 6924
+      },
+      {
+        "url": "https://arc.net/",
+        "name": "Arc Browser",
+        "success": false,
+        "latency_ms": 2480.85,
+        "content_length": 152
+      },
+      {
+        "url": "https://www.amazon.com/dp/B0D1XD1ZV3",
+        "name": "Amazon Product Page",
+        "success": true,
+        "latency_ms": 1586.91,
+        "content_length": 13543
+      },
+      {
+        "url": "https://www.ebay.com/itm/235123456789",
+        "name": "eBay Listing",
+        "success": false,
+        "latency_ms": 60000.0,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.etsy.com/listing/1234567890",
+        "name": "Etsy Listing",
+        "success": false,
+        "latency_ms": 1556.14,
+        "content_length": 317
+      },
+      {
+        "url": "https://www.walmart.com/ip/123456789",
+        "name": "Walmart Product",
+        "success": false,
+        "latency_ms": 60000.0,
+        "content_length": 0
+      },
+      {
+        "url": "https://www.bestbuy.com/site/searchpage.jsp?st=laptop",
+        "name": "BestBuy Search",
+        "success": true,
+        "latency_ms": 1649.89,
+        "content_length": 947
+      },
+      {
+        "url": "https://www.target.com/c/electronics/-/N-5xtg6",
+        "name": "Target Category",
+        "success": false,
+        "latency_ms": 1563.69,
+        "content_length": 169
+      },
+      {
+        "url": "https://www.newegg.com/p/1TS-000D-073H5",
+        "name": "Newegg Product",
+        "success": true,
+        "latency_ms": 2161.68,
+        "content_length": 3736
+      },
+      {
+        "url": "https://www.aliexpress.com/item/1005006123456.html",
+        "name": "AliExpress Product",
+        "success": false,
+        "latency_ms": 2042.84,
+        "content_length": 291
+      },
+      {
+        "url": "https://www.zalando.com/catalog/?catalog=women",
+        "name": "Zalando Catalog",
+        "success": true,
+        "latency_ms": 500.1,
+        "content_length": 14932
+      },
+      {
+        "url": "https://www.lazada.co.id/catalog/?q=sepatu",
+        "name": "Lazada Search",
+        "success": false,
+        "latency_ms": 60000.0,
+        "content_length": 0
+      }
+    ]
+  }
+}

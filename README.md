@@ -2,6 +2,8 @@
 
 > *"Ask for any web data. Get it structured."*
 
+[![Turnstile Benchmark](https://img.shields.io/badge/Turnstile%20Success-93.3%25-brightgreen)](benchmarks/turnstile-2026/README.md)
+
 Datask là Web Data API dành cho AI agents — kết hợp native Cloudflare Turnstile bypass, structured JSON output, và Natural Language extraction trong một API đơn giản, usage-based.
 
 ## Monorepo Structure

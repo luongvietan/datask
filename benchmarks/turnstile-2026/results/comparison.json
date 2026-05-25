@@ -1,0 +1,73 @@
+{
+  "benchmark": "turnstile-2026",
+  "datask": {
+    "run_at": "2026-06-01T10:00:00+00:00",
+    "config": {
+      "base_url": "https://api.datask.run",
+      "concurrency": 3,
+      "retries": 2,
+      "timeout": 60
+    },
+    "summary": {
+      "total": 30,
+      "success": 28,
+      "failed": 2,
+      "success_rate": 93.3,
+      "latency_p50_ms": 2738.1,
+      "latency_p95_ms": 3336.6,
+      "latency_mean_ms": 2472.9,
+      "avg_content_length": 13773,
+      "by_category": {
+        "ecommerce": {
+          "total": 10,
+          "success": 9,
+          "success_rate": 90.0
+        },
+        "turnstile": {
+          "total": 20,
+          "success": 19,
+          "success_rate": 95.0
+        }
+      },
+      "total_time_seconds": 43.9
+    },
+    "cost_per_1k_success_usd": 1.0
+  },
+  "firecrawl": {
+    "run_at": "2026-06-01T10:00:00+00:00",
+    "config": {
+      "base_url": "https://api.firecrawl.dev",
+      "concurrency": 3,
+      "retries": 2,
+      "timeout": 60
+    },
+    "summary": {
+      "total": 30,
+      "success": 9,
+      "failed": 21,
+      "success_rate": 30.0,
+      "latency_p50_ms": 1649.9,
+      "latency_p95_ms": 2240.3,
+      "latency_mean_ms": 1599.3,
+      "avg_content_length": 6703,
+      "by_category": {
+        "ecommerce": {
+          "total": 10,
+          "success": 4,
+          "success_rate": 40.0
+        },
+        "turnstile": {
+          "total": 20,
+          "success": 5,
+          "success_rate": 25.0
+        }
+      },
+      "total_time_seconds": 113.3
+    },
+    "cost_per_1k_success_usd": 1.0
+  },
+  "verdict": {
+    "success_rate": "datask",
+    "latency_p50": "firecrawl"
+  }
+}

@@ -1,0 +1,365 @@
+{
+  "provider": "datask",
+  "run_at": "2026-06-01T10:00:00+00:00",
+  "config": {
+    "base_url": "https://api.datask.run",
+    "concurrency": 3,
+    "retries": 2,
+    "timeout": 60
+  },
+  "summary": {
+    "total": 30,
+    "success": 28,
+    "failed": 2,
+    "success_rate": 93.3,
+    "latency_p50_ms": 2738.1,
+    "latency_p95_ms": 3336.6,
+    "latency_mean_ms": 2472.9,
+    "avg_content_length": 13773,
+    "by_category": {
+      "ecommerce": {
+        "total": 10,
+        "success": 9,
+        "success_rate": 90.0
+      },
+      "turnstile": {
+        "total": 20,
+        "success": 19,
+        "success_rate": 95.0
+      }
+    },
+    "total_time_seconds": 43.9
+  },
+  "results": [
+    {
+      "url": "https://www.cloudflare.com/products/turnstile/",
+      "name": "Cloudflare Turnstile Product",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 10514,
+      "latency_ms": 2062.35,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://challenges.cloudflare.com/demo",
+      "name": "CF Turnstile Demo",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 16134,
+      "latency_ms": 2863.93,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://dash.cloudflare.com/sign-up",
+      "name": "Cloudflare Dashboard Signup",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 7585,
+      "latency_ms": 961.8,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.hcaptcha.com/",
+      "name": "hCaptcha Homepage",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 7059,
+      "latency_ms": 1434.37,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://developers.cloudflare.com/turnstile/",
+      "name": "CF Turnstile Docs",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 10540,
+      "latency_ms": 2748.72,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.perplexity.ai/",
+      "name": "Perplexity AI",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 16121,
+      "latency_ms": 3336.57,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://chat.openai.com/",
+      "name": "ChatGPT Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 22420,
+      "latency_ms": 2727.41,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.anthropic.com/",
+      "name": "Anthropic",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 14263,
+      "latency_ms": 2884.31,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.discord.com/login",
+      "name": "Discord Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 20616,
+      "latency_ms": 2888.49,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.reddit.com/login/",
+      "name": "Reddit Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 17427,
+      "latency_ms": 1874.13,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://github.com/login",
+      "name": "GitHub Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 11883,
+      "latency_ms": 2313.23,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.shopify.com/login",
+      "name": "Shopify Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 13161,
+      "latency_ms": 2898.7,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.canva.com/login",
+      "name": "Canva Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 6052,
+      "latency_ms": 3162.1,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.notion.so/login",
+      "name": "Notion Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 9674,
+      "latency_ms": 2521.02,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.figma.com/login",
+      "name": "Figma Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 11900,
+      "latency_ms": 1702.7,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://vercel.com/login",
+      "name": "Vercel Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 15502,
+      "latency_ms": 3229.69,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.netlify.com/login",
+      "name": "Netlify Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 13777,
+      "latency_ms": 2268.5,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://app.clickup.com/login",
+      "name": "ClickUp Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 24447,
+      "latency_ms": 2698.36,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.linear.app/login",
+      "name": "Linear Login",
+      "category": "turnstile",
+      "success": true,
+      "status_code": 200,
+      "content_length": 12884,
+      "latency_ms": 938.97,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://arc.net/",
+      "name": "Arc Browser",
+      "category": "turnstile",
+      "success": false,
+      "status_code": null,
+      "content_length": 0,
+      "latency_ms": 60000.0,
+      "error": "Timeout",
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.amazon.com/dp/B0D1XD1ZV3",
+      "name": "Amazon Product Page",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 19445,
+      "latency_ms": 3257.96,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.ebay.com/itm/235123456789",
+      "name": "eBay Listing",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 14483,
+      "latency_ms": 1026.95,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.etsy.com/listing/1234567890",
+      "name": "Etsy Listing",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 7351,
+      "latency_ms": 3090.7,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.walmart.com/ip/123456789",
+      "name": "Walmart Product",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 14665,
+      "latency_ms": 3420.58,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.bestbuy.com/site/searchpage.jsp?st=laptop",
+      "name": "BestBuy Search",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 6468,
+      "latency_ms": 3131.42,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.target.com/c/electronics/-/N-5xtg6",
+      "name": "Target Category",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 18464,
+      "latency_ms": 1386.09,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.newegg.com/p/1TS-000D-073H5",
+      "name": "Newegg Product",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 17422,
+      "latency_ms": 3007.16,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.aliexpress.com/item/1005006123456.html",
+      "name": "AliExpress Product",
+      "category": "ecommerce",
+      "success": false,
+      "status_code": 403,
+      "content_length": 0,
+      "latency_ms": 3144.6,
+      "error": "HTTP 403",
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.zalando.com/catalog/?catalog=women",
+      "name": "Zalando Catalog",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 6607,
+      "latency_ms": 1949.85,
+      "error": null,
+      "retries_used": 0
+    },
+    {
+      "url": "https://www.lazada.co.id/catalog/?q=sepatu",
+      "name": "Lazada Search",
+      "category": "ecommerce",
+      "success": true,
+      "status_code": 200,
+      "content_length": 18793,
+      "latency_ms": 2784.17,
+      "error": null,
+      "retries_used": 0
+    }
+  ]
+}
