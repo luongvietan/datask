@@ -63,7 +63,7 @@ async def _report_for_account(account) -> None:  # type: ignore[no-untyped-def]
     )
 
     async with factory() as session:
-        delta = await usage_repo.count_since(session, account.id, since)
+        delta = await usage_repo.sum_credits_since(session, account.id, since)
 
     if delta == 0:
         logger.debug("stripe_usage_no_delta", account_id=account.id)

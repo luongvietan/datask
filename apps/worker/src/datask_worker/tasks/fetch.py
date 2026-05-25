@@ -222,7 +222,7 @@ def run_fetch(
         log.info("fetch_cache_hit")
         response_time_ms = int(time.time() * 1000) - start_ms
         if account_id:
-            from datask_worker.usage_tracker import record_usage
+            from datask_worker.usage_tracker import compute_credits, record_usage
 
             record_usage(
                 account_id=account_id,
@@ -230,7 +230,7 @@ def run_fetch(
                 url=url,
                 layer=1,
                 success=True,
-                credits_used=1,
+                credits_used=compute_credits(success=True, validation_valid=None, layer=1),
                 response_time_ms=response_time_ms,
                 request_id=request_id,
                 fetch_strategy="cache",
@@ -266,25 +266,28 @@ def run_fetch(
         error_code = "fetch_failed"
         log.error("fetch_error", error=str(e))
         raise
+    finally:
+        response_time_ms = int(time.time() * 1000) - start_ms
 
-    response_time_ms = int(time.time() * 1000) - start_ms
+        if account_id:
+            try:
+                from datask_worker.usage_tracker import compute_credits, record_usage
 
-    if account_id:
-        from datask_worker.usage_tracker import record_usage
-
-        record_usage(
-            account_id=account_id,
-            api_key_id=api_key_id,
-            url=url,
-            layer=1,
-            success=success,
-            credits_used=1,
-            response_time_ms=response_time_ms,
-            error_code=error_code,
-            request_id=request_id,
-            fetch_strategy=fetch_strategy,
-            cache_hit=False,
-        )
+                record_usage(
+                    account_id=account_id,
+                    api_key_id=api_key_id,
+                    url=url,
+                    layer=1,
+                    success=success,
+                    credits_used=compute_credits(success=success, validation_valid=None, layer=1),
+                    response_time_ms=response_time_ms,
+                    error_code=error_code,
+                    request_id=request_id,
+                    fetch_strategy=fetch_strategy,
+                    cache_hit=False,
+                )
+            except Exception:
+                pass
 
     return {
         "content": markdown,

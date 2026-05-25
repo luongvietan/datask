@@ -15,6 +15,25 @@ from datask_worker.db import get_session
 logger = structlog.get_logger()
 
 
+_LAYER_CREDITS = {1: 1, 2: 1, 3: 2}
+
+
+def compute_credits(
+    success: bool,
+    validation_valid: bool | None,
+    layer: int,
+) -> int:
+    """
+    Success-only billing: chỉ charge credits khi job thành công
+    VÀ validation không fail (nếu có validation).
+    """
+    if not success:
+        return 0
+    if validation_valid is False:
+        return 0
+    return _LAYER_CREDITS.get(layer, 1)
+
+
 def _extract_domain(url: str) -> str | None:
     try:
         netloc = urlparse(url).netloc or None
@@ -31,7 +50,7 @@ def record_usage(
     url: str,
     layer: int,
     success: bool,
-    credits_used: int = 1,
+    credits_used: int = 0,
     response_time_ms: int | None = None,
     error_code: str | None = None,
     request_id: str | None = None,

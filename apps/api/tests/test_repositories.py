@@ -143,3 +143,137 @@ async def test_usage_insert_with_request_id(db_session: AsyncSession) -> None:
     assert record.domain == "shop.example.com"
     assert record.fetch_strategy == "async"
     assert record.response_time_ms == 1200
+
+
+@pytest.mark.asyncio
+async def test_sum_credits_current_month_billable_only(db_session: AsyncSession) -> None:
+    """sum_credits_current_month() chỉ tính rows có credits_used > 0 (billable)."""
+    account = await accounts_repo.create(db_session, email="billing@example.com")
+    await db_session.commit()
+
+    # Successful L2 → credits=1 (billable)
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://ok.com/1",
+        layer=2,
+        success=True,
+        credits_used=1,
+    )
+    # Successful L3 → credits=2 (billable)
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://ok.com/2",
+        layer=3,
+        success=True,
+        credits_used=2,
+    )
+    # Failed job → credits=0 (NOT billable)
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://fail.com",
+        layer=2,
+        success=False,
+        credits_used=0,
+    )
+    # Validation fail → credits=0 (NOT billable)
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://invalid.com",
+        layer=2,
+        success=True,
+        credits_used=0,
+        validation_valid=False,
+    )
+    await db_session.commit()
+
+    total_credits = await usage_repo.sum_credits_current_month(db_session, account.id)
+    assert total_credits == 3  # 1 + 2, ignoring the 0-credit rows
+
+
+@pytest.mark.asyncio
+async def test_get_summary_credits_billable_only(db_session: AsyncSession) -> None:
+    """get_summary() credits field chỉ tính billable credits."""
+    account = await accounts_repo.create(db_session, email="summary-billing@example.com")
+    await db_session.commit()
+
+    # 2 billable requests (credits=1 each)
+    for _ in range(2):
+        await usage_repo.insert_record(
+            db_session,
+            account_id=account.id,
+            api_key_id=None,
+            url="https://ok.com",
+            layer=2,
+            success=True,
+            credits_used=1,
+        )
+    # 1 failed request (credits=0)
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://fail.com",
+        layer=2,
+        success=False,
+        credits_used=0,
+    )
+    await db_session.commit()
+
+    summary = await usage_repo.get_summary(db_session, account.id)
+    assert summary["current_month_requests"] == 3
+    assert summary["successful_requests"] == 2
+    assert summary["failed_requests"] == 1
+    assert summary["credits_used"] == 2  # chỉ billable
+
+
+@pytest.mark.asyncio
+async def test_sum_credits_since_billable_only(db_session: AsyncSession) -> None:
+    """sum_credits_since() chỉ tính billable credits (credits_used > 0) từ thời điểm since."""
+    from datetime import UTC, datetime, timedelta
+
+    account = await accounts_repo.create(db_session, email="since-billing@example.com")
+    await db_session.commit()
+
+    # Billable L2 → credits=1
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://ok.com/1",
+        layer=2,
+        success=True,
+        credits_used=1,
+    )
+    # Billable L3 → credits=2
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://ok.com/2",
+        layer=3,
+        success=True,
+        credits_used=2,
+    )
+    # Failed → credits=0 (NOT billable)
+    await usage_repo.insert_record(
+        db_session,
+        account_id=account.id,
+        api_key_id=None,
+        url="https://fail.com",
+        layer=2,
+        success=False,
+        credits_used=0,
+    )
+    await db_session.commit()
+
+    since = datetime.now(UTC) - timedelta(hours=1)
+    total = await usage_repo.sum_credits_since(db_session, account.id, since)
+    assert total == 3  # 1 + 2, ignoring credits=0 rows

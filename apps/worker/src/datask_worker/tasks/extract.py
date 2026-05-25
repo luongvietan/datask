@@ -227,7 +227,6 @@ def run_extract(
     validation: OutputValidationResult | None = None
     validation_valid: bool | None = None
     layer = 2 if mode == ExtractionMode.SCHEMA else 3
-    credits_used = 1 if mode == ExtractionMode.SCHEMA else 2
     settings = get_settings()
     model_name = settings.openai_model if mode == ExtractionMode.PROMPT else None
     fetch_result: dict[str, Any] = {}
@@ -260,8 +259,15 @@ def run_extract(
         raise
     finally:
         response_time_ms = int(time.time() * 1000) - start_ms
+        credits_used = 0
         try:
-            from datask_worker.usage_tracker import record_usage
+            from datask_worker.usage_tracker import compute_credits, record_usage
+
+            credits_used = compute_credits(
+                success=success,
+                validation_valid=validation_valid,
+                layer=layer,
+            )
 
             record_usage(
                 account_id=account_id,
@@ -323,16 +329,16 @@ def _check_quota_alert(account_id: str) -> None:
             now = datetime.now(UTC)
             month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-            count = session.execute(
+            total_credits = session.execute(
                 text(
-                    "SELECT COUNT(*) FROM usage_records "
-                    "WHERE account_id = :id AND success = true AND created_at >= :month_start"
+                    "SELECT COALESCE(SUM(credits_used), 0) FROM usage_records "
+                    "WHERE account_id = :id AND credits_used > 0 AND created_at >= :month_start"
                 ),
                 {"id": account_id, "month_start": month_start},
             ).scalar() or 0
 
         quota = int(os.environ.get("FREE_TIER_MONTHLY_QUOTA", "500"))
-        pct = int(count / quota * 100) if quota > 0 else 0
+        pct = int(total_credits / quota * 100) if quota > 0 else 0
 
         alert_key = None
         if pct >= 100:

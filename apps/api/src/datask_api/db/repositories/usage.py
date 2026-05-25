@@ -65,7 +65,7 @@ async def count_current_month(session: AsyncSession, account_id: str) -> int:
 
 
 async def sum_credits_current_month(session: AsyncSession, account_id: str) -> int:
-    """Tổng credits dùng trong tháng hiện tại."""
+    """Tổng credits dùng trong tháng hiện tại (chỉ tính billable requests)."""
     now = datetime.now(UTC)
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -73,6 +73,7 @@ async def sum_credits_current_month(session: AsyncSession, account_id: str) -> i
         select(func.coalesce(func.sum(UsageRecord.credits_used), 0)).where(
             UsageRecord.account_id == account_id,
             UsageRecord.created_at >= month_start,
+            UsageRecord.credits_used > 0,
         )
     )
     return result.scalar_one() or 0
@@ -89,7 +90,12 @@ async def get_summary(session: AsyncSession, account_id: str) -> dict[str, Any]:
             func.sum(
                 case((UsageRecord.success == True, 1), else_=0)  # noqa: E712
             ).label("successful"),
-            func.coalesce(func.sum(UsageRecord.credits_used), 0).label("credits"),
+            func.coalesce(
+                func.sum(
+                    case((UsageRecord.credits_used > 0, UsageRecord.credits_used), else_=0)
+                ),
+                0,
+            ).label("credits"),
         ).where(
             UsageRecord.account_id == account_id,
             UsageRecord.created_at >= month_start,
@@ -137,13 +143,13 @@ async def top_domains(
     return [{"domain": d, "count": c} for d, c in sorted_domains[:limit]]
 
 
-async def count_since(session: AsyncSession, account_id: str, since: datetime) -> int:
-    """Đếm request thành công từ thời điểm `since` đến nay (cho Stripe usage reporter)."""
+async def sum_credits_since(session: AsyncSession, account_id: str, since: datetime) -> int:
+    """Tổng billable credits từ thời điểm `since` đến nay (cho Stripe metered billing)."""
     result = await session.execute(
-        select(func.count(UsageRecord.id)).where(
+        select(func.coalesce(func.sum(UsageRecord.credits_used), 0)).where(
             UsageRecord.account_id == account_id,
-            UsageRecord.success == True,  # noqa: E712
             UsageRecord.created_at >= since,
+            UsageRecord.credits_used > 0,
         )
     )
     return result.scalar_one() or 0
