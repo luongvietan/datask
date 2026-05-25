@@ -80,7 +80,6 @@ class ApiKey(Base):
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     account: Mapped["Account"] = relationship(back_populates="api_keys")
-    usage_records: Mapped[list["UsageRecord"]] = relationship(back_populates="api_key")
 
     __table_args__ = (Index("ix_api_keys_prefix", "key_prefix"),)
 
@@ -90,7 +89,7 @@ class UsageRecord(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id"), nullable=False)
-    api_key_id: Mapped[str | None] = mapped_column(ForeignKey("api_keys.id"), nullable=True)
+    api_key_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     url: Mapped[str] = mapped_column(Text, nullable=False)
     layer: Mapped[int] = mapped_column(Integer, nullable=False)            # 1, 2, or 3
     success: Mapped[bool] = mapped_column(Boolean, nullable=False)
@@ -107,7 +106,6 @@ class UsageRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     account: Mapped["Account"] = relationship(back_populates="usage_records")
-    api_key: Mapped["ApiKey | None"] = relationship(back_populates="usage_records")
 
     __table_args__ = (
         Index("ix_usage_account_created", "account_id", "created_at"),

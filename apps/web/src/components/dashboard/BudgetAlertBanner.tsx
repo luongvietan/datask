@@ -5,7 +5,7 @@ import { useSessionKey } from "@/hooks/useSessionKey";
 import { useUsage } from "@/hooks/useUsage";
 import { Icon, type IconProp } from "@/components/ui/Icon";
 import { Badge } from "@/components/ui/Badge";
-import { Alert01Icon, Cancel01Icon, CloseIcon } from "@hugeicons/core-free-icons";
+import { Alert01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import Link from "next/link";
 
 export function BudgetAlertBanner() {
@@ -92,7 +92,7 @@ export function BudgetAlertBanner() {
         className={`shrink-0 ${textClass} hover:opacity-70 transition-opacity`}
         aria-label="Close alert"
       >
-        <Icon icon={CloseIcon as IconProp} size={18} />
+        <Icon icon={Cancel01Icon as IconProp} size={18} />
       </button>
     </div>
   );

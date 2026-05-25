@@ -22,6 +22,10 @@ export async function GET() {
   });
 
   if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.error(
+      `[session-key] Backend ${res.status}: ${body}`,
+    );
     return NextResponse.json({ error: "Failed to issue session key" }, { status: 500 });
   }
 
