@@ -90,23 +90,48 @@ async def extract_url(
     # Check if async mode requested
     is_async = request.headers.get("X-Datask-Async", "").lower() in ("true", "1", "yes")
 
-    result = await enqueue_extract_job(
-        url=payload.url,
-        mode=payload.mode,
-        schema=payload.schema_,
-        prompt=payload.prompt,
-        example=payload.example,
-        api_key_id=key_id,
-        account_id=account_id,
-        is_async=is_async,
-    )
+    try:
+        result = await enqueue_extract_job(
+            url=payload.url,
+            mode=payload.mode,
+            schema=payload.schema_,
+            prompt=payload.prompt,
+            example=payload.example,
+            api_key_id=key_id,
+            account_id=account_id,
+            is_async=is_async,
+        )
+    except (ConnectionError, OSError):
+        return JSONResponse(
+            status_code=503,
+            content=ErrorResponse(
+                error=ErrorCode.INTERNAL_ERROR,
+                message="Worker unavailable. Redis is not running — start Redis to enable extraction.",
+            ).model_dump(),
+        )
+    except TimeoutError:
+        return JSONResponse(
+            status_code=503,
+            content=ErrorResponse(
+                error=ErrorCode.INTERNAL_ERROR,
+                message="Extraction timed out after 60s.",
+            ).model_dump(),
+        )
+    except Exception as exc:
+        return JSONResponse(
+            status_code=500,
+            content=ErrorResponse(
+                error=ErrorCode.INTERNAL_ERROR,
+                message=f"Extraction failed: {exc}",
+            ).model_dump(),
+        )
 
     if isinstance(result, JSONResponse):
         return result
 
     response = JSONResponse(
         status_code=200,
-        content=result.model_dump(),
+        content=result.model_dump(mode="json"),
         headers={
             "X-RateLimit-Remaining": str(max(0, remaining - 1)),
             "X-RateLimit-Limit": str(limit),

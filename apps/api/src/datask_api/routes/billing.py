@@ -61,7 +61,7 @@ async def usage_history(
 ) -> JSONResponse:
     from datask_api.db.session import get_session_factory
     from datask_api.models.db import UsageRecord
-    from sqlalchemy import func, select, cast, Date
+    from sqlalchemy import func, select, cast, Date, Integer
     from datetime import UTC, datetime, timedelta
 
     factory = get_session_factory()
@@ -74,7 +74,7 @@ async def usage_history(
             select(
                 cast(UsageRecord.created_at, Date).label("date"),
                 func.count(UsageRecord.id).label("requests"),
-                func.sum(func.cast(UsageRecord.success, type_=None)).label("successful"),
+                func.sum(cast(UsageRecord.success, Integer)).label("successful"),
             )
             .where(
                 UsageRecord.account_id == account_id,

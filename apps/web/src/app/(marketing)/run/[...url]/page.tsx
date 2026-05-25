@@ -1,68 +1,31 @@
 /**
- * datask.run/run/{url} — Layer 1 viral endpoint.
- * Server component: fetches content from backend, renders Markdown.
+ * Legacy path-based route: /run/https:/example.com/path
+ * Reconstructs the URL and redirects to the canonical query-param format:
+ * /run?url=https://example.com/path
  */
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
-import { RunPageClient } from "./RunPageClient";
-
-const DATASK_API_URL = process.env.DATASK_API_URL ?? "http://localhost:8000";
 
 interface Props {
   params: Promise<{ url: string[] }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { url } = await params;
-  const targetUrl = url.join("/");
-  return {
-    title: `Fetched: ${targetUrl}`,
-    description: `Clean content from ${targetUrl} via Datask`,
-  };
+function reconstructUrl(segments: string[]): string | null {
+  const raw = segments.join("/");
+  const target = raw.startsWith("http")
+    ? raw.replace(/^(https?:\/)([^/])/, "$1/$2")
+    : `https://${raw}`;
+  if (!target.startsWith("http://") && !target.startsWith("https://")) {
+    return null;
+  }
+  return target;
 }
 
-export default async function RunPage({ params }: Props) {
+export default async function RunLegacyPage({ params }: Props) {
   const { url } = await params;
+  const targetUrl = reconstructUrl(url);
 
-  // Reconstruct full URL. Browsers normalize `https://` → `https:/` in paths,
-  // so we restore the missing slash before validating.
-  const rawUrl = url.join("/");
-  const targetUrl = rawUrl.startsWith("http")
-    ? rawUrl.replace(/^(https?:\/)([^/])/, "$1/$2")
-    : `https://${rawUrl}`;
+  if (!targetUrl) notFound();
 
-  if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
-    notFound();
-  }
-
-  let content: string | null = null;
-  let fetchError: string | null = null;
-  let fetchedAt: string | null = null;
-
-  try {
-    const res = await fetch(
-      `${DATASK_API_URL}/v1/fetch?url=${encodeURIComponent(targetUrl)}`,
-      { next: { revalidate: 60 } }
-    );
-
-    if (res.ok) {
-      const data = await res.json();
-      content = data.content;
-      fetchedAt = data.fetched_at;
-    } else {
-      const err = await res.json().catch(() => ({}));
-      fetchError = err.message ?? `HTTP ${res.status}`;
-    }
-  } catch (err) {
-    fetchError = "Failed to connect to Datask API.";
-  }
-
-  return (
-    <RunPageClient
-      targetUrl={targetUrl}
-      content={content}
-      fetchError={fetchError}
-      fetchedAt={fetchedAt}
-    />
-  );
+  redirect(`/run?url=${encodeURIComponent(targetUrl)}`);
 }

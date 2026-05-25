@@ -74,5 +74,30 @@ async def fetch_url(
             except Exception:
                 pass
 
-    result = await enqueue_fetch_job(url=url, account_id=account_id, api_key_id=api_key_id)
-    return result
+    try:
+        result = await enqueue_fetch_job(url=url, account_id=account_id, api_key_id=api_key_id)
+        return result
+    except (ConnectionError, OSError) as exc:
+        return JSONResponse(
+            status_code=503,
+            content=ErrorResponse(
+                error=ErrorCode.INTERNAL_ERROR,
+                message="Worker unavailable. Redis is not running — start Redis to enable scraping.",
+            ).model_dump(),
+        )
+    except TimeoutError:
+        return JSONResponse(
+            status_code=503,
+            content=ErrorResponse(
+                error=ErrorCode.INTERNAL_ERROR,
+                message="Fetch timed out after 30s. The site may be slow or blocking requests.",
+            ).model_dump(),
+        )
+    except Exception as exc:
+        return JSONResponse(
+            status_code=500,
+            content=ErrorResponse(
+                error=ErrorCode.INTERNAL_ERROR,
+                message=f"Fetch failed: {exc}",
+            ).model_dump(),
+        )

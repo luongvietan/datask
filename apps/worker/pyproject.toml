@@ -7,7 +7,7 @@ dependencies = [
     "datask-core",
     "rq>=1.16",
     "redis[hiredis]>=5.0",
-    "scrapling>=0.4.6",
+    "scrapling[all]>=0.4.6",
     "openai>=1.30",
     "structlog>=24.0",
     "httpx>=0.27",

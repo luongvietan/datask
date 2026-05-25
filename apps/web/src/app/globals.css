@@ -52,24 +52,28 @@
    ============================================================ */
 @layer components {
   .text-display-xxl {
+    @apply font-display;
     font-size: 110px;
     line-height: 0.85;
     letter-spacing: -5.5px;
     font-weight: 500;
   }
   .text-display-xl {
+    @apply font-display;
     font-size: 85px;
     line-height: 0.95;
     letter-spacing: -4.25px;
     font-weight: 500;
   }
   .text-display-lg {
+    @apply font-display;
     font-size: 62px;
     line-height: 1.00;
     letter-spacing: -3.1px;
     font-weight: 500;
   }
   .text-display-md {
+    @apply font-display;
     font-size: 32px;
     line-height: 1.13;
     letter-spacing: -1.0px;

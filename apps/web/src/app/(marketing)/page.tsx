@@ -1,6 +1,7 @@
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { DemoSection } from "@/components/marketing/DemoSection";
 import { FeaturesSection } from "@/components/marketing/FeaturesSection";
+import { CompetitorComparisonSection } from "@/components/marketing/CompetitorComparisonSection";
 import { CodeExampleSection } from "@/components/marketing/CodeExampleSection";
 import { PricingSection } from "@/components/marketing/PricingSection";
 import { FaqSection } from "@/components/marketing/FaqSection";
@@ -12,6 +13,7 @@ export default function LandingPage() {
       <HeroSection />
       <DemoSection />
       <FeaturesSection />
+      <CompetitorComparisonSection />
       <CodeExampleSection />
       <PricingSection />
       <FaqSection />

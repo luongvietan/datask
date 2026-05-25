@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
-  const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
+  const PROTECTED = ["/dashboard", "/playground", "/usage", "/keys", "/billing"];
+  const isDashboard = PROTECTED.some((p) => req.nextUrl.pathname.startsWith(p));
 
   if (isDashboard && !isLoggedIn) {
     const loginUrl = new URL("/login", req.url);
@@ -15,5 +16,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/playground", "/usage", "/keys", "/billing"],
 };
