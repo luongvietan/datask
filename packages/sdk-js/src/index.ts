@@ -48,8 +48,21 @@ export class RateLimitError extends DataskError {
 // Types
 // ---------------------------------------------------------------------------
 
+export type FieldSchemaType = "string" | "number" | "integer" | "boolean";
+
+export interface ExtendedFieldSchema {
+  type: FieldSchemaType;
+  required?: boolean;
+  minimum?: number;
+  maximum?: number;
+  maxLength?: number;
+  selector?: string;
+}
+
+export type FieldSchema = FieldSchemaType | ExtendedFieldSchema;
+
 export interface ExtractSchemaOptions {
-  schema: Record<string, string | { type: string; selector?: string }>;
+  schema: Record<string, FieldSchema>;
   prompt?: never;
 }
 

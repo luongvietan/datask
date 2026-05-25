@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import os
 import time
-from typing import Any
+from typing import Any, TypedDict
 
 import httpx
 
@@ -54,6 +54,46 @@ class RateLimitError(DataskError):
 
 class FetchError(DataskError):
     """Failed to fetch URL."""
+
+
+class ValidationErrorItem(TypedDict):
+    field: str
+    code: str
+    message: str
+
+
+class ValidationWarningItem(TypedDict):
+    field: str
+    code: str
+    message: str
+
+
+class ValidationBlock(TypedDict, total=False):
+    valid: bool | None
+    errors: list[ValidationErrorItem]
+    warnings: list[ValidationWarningItem]
+
+
+class ExtractResult(TypedDict, total=False):
+    data: dict[str, Any]
+    validation: ValidationBlock
+    confidence: dict[str, Any]
+    inferred_schema: dict[str, Any]
+    meta: dict[str, Any]
+    url: str
+    fetched_at: str
+    credits_used: int
+
+
+def _want_full_response(
+    *,
+    schema: dict[str, Any] | None,
+    full_response: bool | None,
+) -> bool:
+    """Layer 2 (schema) returns full payload by default so validation is visible."""
+    if full_response is not None:
+        return full_response
+    return schema is not None
 
 
 # ---------------------------------------------------------------------------
@@ -126,10 +166,15 @@ class Client:
         prompt: str | None = None,
         example: dict[str, Any] | None = None,
         async_mode: bool = False,
+        *,
+        full_response: bool | None = None,
     ) -> dict[str, Any]:
         """
         Layer 2 (schema) or Layer 3 (prompt) extraction.
-        Returns extracted data dict.
+
+        Layer 2 returns the full API payload by default (includes validation block).
+        Layer 3 returns extracted data only unless full_response=True.
+        Pass full_response=False on Layer 2 to get just the data dict.
 
         async_mode=True: sends X-Datask-Async: true header, polls until done.
         """
@@ -143,6 +188,7 @@ class Client:
         else:
             raise ValueError("Provide either schema (Layer 2) or prompt (Layer 3)")
 
+        want_full = _want_full_response(schema=schema, full_response=full_response)
         headers = {"X-Datask-Async": "true"} if async_mode else {}
 
         resp = self._http.post("/v1/extract", json=body, headers=headers)
@@ -152,18 +198,24 @@ class Client:
         if resp.status_code == 202:
             # Poll until complete
             job_id = data["job_id"]
-            return self._poll_job(job_id)
+            polled = self._poll_job(job_id, full_response=want_full)
+            return polled
 
+        if want_full:
+            return data
         return data.get("data", data)
 
-    def _poll_job(self, job_id: str) -> dict[str, Any]:
+    def _poll_job(self, job_id: str, *, full_response: bool = False) -> dict[str, Any]:
         deadline = time.time() + MAX_POLL_SECONDS
         while time.time() < deadline:
             resp = self._http.get(f"/v1/jobs/{job_id}")
             self._raise_for_status(resp)
             job = resp.json()
             if job["status"] == "completed":
-                return job.get("result", {}).get("data", job.get("result", {}))
+                result = job.get("result", {})
+                if full_response:
+                    return result if isinstance(result, dict) else {}
+                return result.get("data", result) if isinstance(result, dict) else {}
             if job["status"] == "failed":
                 raise FetchError(f"Job {job_id} failed")
             time.sleep(POLL_INTERVAL)
@@ -236,6 +288,8 @@ class AsyncClient:
         prompt: str | None = None,
         example: dict[str, Any] | None = None,
         async_mode: bool = False,
+        *,
+        full_response: bool | None = None,
     ) -> dict[str, Any]:
         body: dict[str, Any] = {"url": url}
         if schema:
@@ -247,6 +301,7 @@ class AsyncClient:
         else:
             raise ValueError("Provide either schema (Layer 2) or prompt (Layer 3)")
 
+        want_full = _want_full_response(schema=schema, full_response=full_response)
         headers = {"X-Datask-Async": "true"} if async_mode else {}
 
         resp = await self._http.post("/v1/extract", json=body, headers=headers)
@@ -255,11 +310,13 @@ class AsyncClient:
 
         if resp.status_code == 202:
             job_id = data["job_id"]
-            return await self._poll_job(job_id)
+            return await self._poll_job(job_id, full_response=want_full)
 
+        if want_full:
+            return data
         return data.get("data", data)
 
-    async def _poll_job(self, job_id: str) -> dict[str, Any]:
+    async def _poll_job(self, job_id: str, *, full_response: bool = False) -> dict[str, Any]:
         import asyncio
 
         deadline = time.time() + MAX_POLL_SECONDS
@@ -268,7 +325,10 @@ class AsyncClient:
             self._raise_for_status(resp)
             job = resp.json()
             if job["status"] == "completed":
-                return job.get("result", {}).get("data", job.get("result", {}))
+                result = job.get("result", {})
+                if full_response:
+                    return result if isinstance(result, dict) else {}
+                return result.get("data", result) if isinstance(result, dict) else {}
             if job["status"] == "failed":
                 raise FetchError(f"Job {job_id} failed")
             await asyncio.sleep(POLL_INTERVAL)

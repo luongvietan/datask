@@ -140,6 +140,33 @@ class ExtractRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+class ValidationError(BaseModel):
+    """Single output validation error (Layer 2 post-extraction)."""
+
+    field: str
+    code: Literal["type_mismatch", "missing_required", "constraint_violation"]
+    message: str
+
+
+class ValidationWarning(BaseModel):
+    """Non-fatal output validation warning (e.g. missing optional field)."""
+
+    field: str
+    code: Literal["missing_optional"] = "missing_optional"
+    message: str
+
+
+class OutputValidationResult(BaseModel):
+    """Validation block attached to Layer 2 extract responses."""
+
+    valid: bool | None = Field(
+        default=None,
+        description="False when output fails validation; null for Layer 3 (not validated)",
+    )
+    errors: list[ValidationError] = Field(default_factory=list)
+    warnings: list[ValidationWarning] = Field(default_factory=list)
+
+
 class RequestMeta(BaseModel):
     """Provenance metadata attached to every fetch/extract response."""
 
@@ -170,6 +197,10 @@ class FetchResponse(BaseModel):
 
 class ExtractResponse(BaseModel):
     data: dict[str, Any]
+    validation: OutputValidationResult | None = Field(
+        default=None,
+        description="Layer 2 output validation; omitted or valid=null for Layer 3",
+    )
     inferred_schema: dict[str, Any] | None = None  # Layer 3 only
     confidence: dict[str, Any] | None = None        # Layer 2 field-level confidence
     url: str

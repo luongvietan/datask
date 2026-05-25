@@ -14,7 +14,8 @@ from typing import Any
 
 import structlog
 from datask_core.config import get_settings
-from datask_core.models import ExtractionMode
+from datask_core.models import ExtractionMode, OutputValidationResult
+from datask_core.schema_validator import validate_output
 
 from datask_worker.tasks.fetch import run_fetch
 
@@ -223,6 +224,8 @@ def run_extract(
     data: dict[str, Any] = {}
     inferred_schema: dict[str, Any] | None = None
     confidence: dict[str, Any] | None = None
+    validation: OutputValidationResult | None = None
+    validation_valid: bool | None = None
     layer = 2 if mode == ExtractionMode.SCHEMA else 3
     credits_used = 1 if mode == ExtractionMode.SCHEMA else 2
     settings = get_settings()
@@ -237,6 +240,8 @@ def run_extract(
             if not schema:
                 raise ValueError("schema required for Layer 2 extraction")
             data, confidence = _extract_with_schema(content=content, html="", schema=schema)
+            validation = validate_output(data, schema)
+            validation_valid = validation.valid
 
         elif mode == ExtractionMode.PROMPT:
             if not prompt:
@@ -268,6 +273,7 @@ def run_extract(
                 response_time_ms=response_time_ms,
                 error_code=error_code,
                 request_id=request_id,
+                validation_valid=validation_valid,
                 model=model_name,
             )
         except Exception:
@@ -292,6 +298,8 @@ def run_extract(
     }
     if confidence:
         result["confidence"] = confidence
+    if validation is not None:
+        result["validation"] = validation.model_dump()
 
     return result
 

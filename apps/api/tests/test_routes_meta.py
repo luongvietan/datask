@@ -5,7 +5,14 @@ from unittest.mock import AsyncMock, patch
 from datask_api.middleware.auth import get_current_key
 from datask_api.middleware.request_context import REQUEST_ID_HEADER, RequestContextMiddleware
 from datask_api.routes import extract, fetch
-from datask_core.models import ContentType, ExtractResponse, FetchResponse, RequestMeta
+from datask_core.models import (
+    ContentType,
+    ExtractResponse,
+    FetchResponse,
+    OutputValidationResult,
+    RequestMeta,
+    ValidationError,
+)
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from httpx import ASGITransport, AsyncClient
@@ -88,6 +95,52 @@ async def test_fetch_rate_limited_still_has_request_id_header():
 
     assert response.status_code == 429
     assert response.headers.get(REQUEST_ID_HEADER) is not None
+
+
+async def test_extract_sync_response_includes_validation_block_when_invalid():
+    app = _make_extract_app()
+    mock_response = ExtractResponse(
+        data={"price": "bad"},
+        url="https://example.com",
+        validation=OutputValidationResult(
+            valid=False,
+            errors=[
+                ValidationError(
+                    field="price",
+                    code="type_mismatch",
+                    message="Field 'price' expected type 'number', got str",
+                )
+            ],
+        ),
+        meta=RequestMeta(
+            request_id="req_01JABCDEFGHJKMNPQRSTVWXYZ0",
+            layer=2,
+            latency_ms=500,
+        ),
+    )
+
+    with patch("datask_api.routes.extract.check_key_rate_limit", new_callable=AsyncMock) as mock_rl:
+        mock_rl.return_value = (True, 0)
+        with patch("datask_api.routes.extract.get_remaining", new_callable=AsyncMock) as mock_rem:
+            mock_rem.return_value = 10
+            with patch(
+                "datask_api.routes.extract.enqueue_extract_job",
+                new_callable=AsyncMock,
+                return_value=mock_response,
+            ):
+                transport = ASGITransport(app=app)
+                async with AsyncClient(transport=transport, base_url="http://test") as client:
+                    response = await client.post(
+                        "/v1/extract",
+                        json={"url": "https://example.com", "schema": {"price": "number"}},
+                        headers={"Authorization": "Bearer dtsk_live_test"},
+                    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["validation"]["valid"] is False
+    assert body["validation"]["errors"][0]["code"] == "type_mismatch"
+    assert body["validation"]["errors"][0]["field"] == "price"
 
 
 async def test_extract_sync_success_includes_meta_request_id():

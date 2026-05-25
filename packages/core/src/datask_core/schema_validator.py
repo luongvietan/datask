@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from datask_core.models import OutputValidationResult, ValidationError, ValidationWarning
 from pydantic import BaseModel
 
 SUPPORTED_TYPES = frozenset({"string", "number", "integer", "boolean"})
@@ -157,3 +158,111 @@ def normalize_field_schema(definition: str | dict[str, Any]) -> dict[str, Any]:
 def normalize_input_schema(schema: dict[str, Any]) -> dict[str, dict[str, Any]]:
     """Normalize all fields in a schema dict to extended format."""
     return {field: normalize_field_schema(defn) for field, defn in schema.items()}
+
+
+def _is_missing(value: Any) -> bool:
+    return value is None
+
+
+def _check_value_type(value: Any, type_name: str) -> bool:
+    if type_name == "string":
+        return isinstance(value, str)
+    if type_name == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if type_name == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if type_name == "boolean":
+        return isinstance(value, bool)
+    return False
+
+
+def _check_constraints(
+    field_name: str,
+    value: Any,
+    field_def: dict[str, Any],
+) -> ValidationError | None:
+    type_name = field_def["type"]
+    minimum = field_def.get("minimum")
+    maximum = field_def.get("maximum")
+    max_length = field_def.get("maxLength")
+
+    if type_name in NUMERIC_TYPES and minimum is not None:
+        if value < minimum:
+            return ValidationError(
+                field=field_name,
+                code="constraint_violation",
+                message=f"Value {value} is below minimum {minimum}",
+            )
+
+    if type_name in NUMERIC_TYPES and maximum is not None:
+        if value > maximum:
+            return ValidationError(
+                field=field_name,
+                code="constraint_violation",
+                message=f"Value {value} is above maximum {maximum}",
+            )
+
+    if type_name == "string" and max_length is not None:
+        if len(value) > max_length:
+            return ValidationError(
+                field=field_name,
+                code="constraint_violation",
+                message=f"String length {len(value)} exceeds maxLength {max_length}",
+            )
+
+    return None
+
+
+def validate_output(data: dict[str, Any], schema: dict[str, Any]) -> OutputValidationResult:
+    """Validate Layer 2 extracted data against schema. No I/O."""
+    errors: list[ValidationError] = []
+    warnings: list[ValidationWarning] = []
+
+    normalized = normalize_input_schema(schema)
+
+    for field_name, field_def in normalized.items():
+        required = bool(field_def.get("required", False))
+        type_name = field_def["type"]
+        value = data.get(field_name)
+
+        if _is_missing(value):
+            if required:
+                errors.append(
+                    ValidationError(
+                        field=field_name,
+                        code="missing_required",
+                        message=f"Required field '{field_name}' is missing or null",
+                    )
+                )
+            else:
+                warnings.append(
+                    ValidationWarning(
+                        field=field_name,
+                        code="missing_optional",
+                        message=f"Optional field '{field_name}' is missing or null",
+                    )
+                )
+            continue
+
+        if not _check_value_type(value, type_name):
+            errors.append(
+                ValidationError(
+                    field=field_name,
+                    code="type_mismatch",
+                    message=(
+                        f"Field '{field_name}' expected type '{type_name}', "
+                        f"got {type(value).__name__}"
+                    ),
+                )
+            )
+            continue
+
+        constraint_err = _check_constraints(field_name, value, field_def)
+        if constraint_err is not None:
+            errors.append(constraint_err)
+
+    return OutputValidationResult(
+        valid=len(errors) == 0,
+        errors=errors,
+        warnings=warnings,
+    )
